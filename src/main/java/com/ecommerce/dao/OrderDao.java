@@ -1,127 +1,70 @@
 package com.ecommerce.dao;
 
-import java.sql.Connection;
+import com.ecommerce.entities.Order;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
+import java.sql.Timestamp;
 import java.util.List;
 
-import com.ecommerce.entities.Order;
-
+@Repository
 public class OrderDao {
-	
-	private Connection con;
-	public OrderDao(Connection con) {
-		super();
-		this.con = con;
-	}
-	
-	public int insertOrder(Order order) {
-		int id = 0;
-		try {
-			String query = "insert into `order`(orderid, status, paymentType, userId) values(?, ?, ?, ?)";
-			PreparedStatement psmt = this.con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-			
-			psmt.setString(1, order.getOrderId());
-			psmt.setString(2, order.getStatus());
-			psmt.setString(3, order.getPayementType());
-			psmt.setInt(4, order.getUserId());
-			
-			int affectedRows = psmt.executeUpdate();
 
-	        if (affectedRows == 0) {
-	            throw new SQLException("Insertion failed, no rows affected.");
-	        }
-	        try (ResultSet generatedKeys = psmt.getGeneratedKeys()) {
-	            if (generatedKeys.next()) {
-	                id = generatedKeys.getInt(1);
-	            }
-	            else {
-	                throw new SQLException("Insertion failed, no ID obtained.");
-	            }
-	        }
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return id;
-	}
-	public List<Order> getAllOrderByUserId(int uid){
-		List<Order> list = new ArrayList<Order>();
-		try {
-			String query = "select * from `order` where userId = ?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setInt(1, uid);
-			ResultSet rs = psmt.executeQuery();
-			while (rs.next()) {
-				Order order = new Order();
-				order.setId(rs.getInt("id"));
-				order.setOrderId(rs.getString("orderid"));
-				order.setStatus(rs.getString("status"));
-				order.setDate(rs.getTimestamp("date"));
-				order.setPayementType(rs.getString("paymentType"));
-				order.setUserId(uid);
+	private final JdbcTemplate jdbcTemplate;
 
-				list.add(order);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return list;
+	public OrderDao(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
 	}
-	public Order getOrderById(int id){
+
+	// Маппер
+	private Order mapRowToOrder(java.sql.ResultSet rs, int rowNum) throws java.sql.SQLException {
 		Order order = new Order();
-		try {
-			String query = "select * from `order` where id = ?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setInt(1, id);
-			ResultSet rs = psmt.executeQuery();
-			while (rs.next()) {
-				order.setId(rs.getInt("id"));
-				order.setOrderId(rs.getString("orderid"));
-				order.setStatus(rs.getString("status"));
-				order.setDate(rs.getTimestamp("date"));
-				order.setPayementType(rs.getString("paymentType"));
-				order.setUserId(rs.getInt("userId"));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		order.setId(rs.getInt("id"));
+		order.setOrderId(rs.getString("orderid"));
+		order.setStatus(rs.getString("status"));
+		order.setDate(rs.getTimestamp("date"));
+		order.setPayementType(rs.getString("paymentType"));
+		order.setUserId(rs.getInt("userId"));
 		return order;
 	}
-	public List<Order> getAllOrder(){
-		List<Order> list = new ArrayList<Order>();
-		try {
-			String query = "select * from `order`";
-			Statement statement = this.con.createStatement();
-			ResultSet rs = statement.executeQuery(query);
-			while (rs.next()) {
-				Order order = new Order();
-				order.setId(rs.getInt("id"));
-				order.setOrderId(rs.getString("orderid"));
-				order.setStatus(rs.getString("status"));
-				order.setDate(rs.getTimestamp("date"));
-				order.setPayementType(rs.getString("paymentType"));
-				order.setUserId(rs.getInt("userId"));
-				
-				list.add(order);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return list;
-	}
-	public void updateOrderStatus(int oid, String status) {
-		try {
-			String query = "update `order` set status = ? where id = ?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setString(1, status);
-			psmt.setInt(2, oid);
 
-			psmt.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public int insertOrder(Order order) {
+		String sql = "INSERT INTO `order` (orderid, status, paymentType, userId) VALUES (?, ?, ?, ?)";
+		KeyHolder keyHolder = new GeneratedKeyHolder();
+
+		jdbcTemplate.update(connection -> {
+			PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			ps.setString(1, order.getOrderId());
+			ps.setString(2, order.getStatus());
+			ps.setString(3, order.getPayementType());
+			ps.setInt(4, order.getUserId());
+			return ps;
+		}, keyHolder);
+
+		return keyHolder.getKey() != null ? keyHolder.getKey().intValue() : 0;
+	}
+
+	public List<Order> getAllOrderByUserId(int uid) {
+		String sql = "SELECT * FROM `order` WHERE userId = ?";
+		return jdbcTemplate.query(sql, this::mapRowToOrder, uid);
+	}
+
+	public Order getOrderById(int id) {
+		String sql = "SELECT * FROM `order` WHERE id = ?";
+		return jdbcTemplate.queryForObject(sql, this::mapRowToOrder, id);
+	}
+
+	public List<Order> getAllOrder() {
+		String sql = "SELECT * FROM `order`";
+		return jdbcTemplate.query(sql, this::mapRowToOrder);
+	}
+
+	public void updateOrderStatus(int oid, String status) {
+		String sql = "UPDATE `order` SET status=? WHERE id=?";
+		jdbcTemplate.update(sql, status, oid);
 	}
 }

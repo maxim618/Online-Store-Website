@@ -1,58 +1,44 @@
 package com.ecommerce.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
+import com.ecommerce.entities.OrderedProduct;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
-import com.ecommerce.entities.OrderedProduct;
-
+@Repository
 public class OrderedProductDao {
-	private Connection con;
 
-	public OrderedProductDao(Connection con) {
-		super();
-		this.con = con;
+	private final JdbcTemplate jdbcTemplate;
+
+	public OrderedProductDao(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
 	}
-	
+
+	// Маппер из ResultSet -> OrderedProduct
+	private OrderedProduct mapRowToOrderedProduct(java.sql.ResultSet rs, int rowNum) throws java.sql.SQLException {
+		OrderedProduct orderedProduct = new OrderedProduct();
+		orderedProduct.setName(rs.getString("name"));
+		orderedProduct.setQuantity(rs.getInt("quantity"));
+		orderedProduct.setPrice(rs.getFloat("price"));
+		orderedProduct.setImage(rs.getString("image"));
+		orderedProduct.setOrderId(rs.getInt("orderid"));
+		return orderedProduct;
+	}
+
 	public void insertOrderedProduct(OrderedProduct ordProduct) {
-		try {
-			String query = "insert into ordered_product(name, quantity, price, image, orderid) values(?, ?, ?, ?, ?)";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setString(1, ordProduct.getName());
-			psmt.setInt(2, ordProduct.getQuantity());
-			psmt.setFloat(3,ordProduct.getPrice());
-			psmt.setString(4, ordProduct.getImage());
-			psmt.setInt(5, ordProduct.getOrderId());
-
-			psmt.executeUpdate();
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		String sql = "INSERT INTO ordered_product(name, quantity, price, image, orderid) VALUES (?, ?, ?, ?, ?)";
+		jdbcTemplate.update(sql,
+				ordProduct.getName(),
+				ordProduct.getQuantity(),
+				ordProduct.getPrice(),
+				ordProduct.getImage(),
+				ordProduct.getOrderId()
+		);
 	}
-	public List<OrderedProduct> getAllOrderedProduct(int oid){
-		List<OrderedProduct> list = new ArrayList<OrderedProduct>();
-		try {
-			String query = "select * from ordered_product where orderid = ?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setInt(1, oid);
-			ResultSet rs = psmt.executeQuery();
-			while (rs.next()) {
-				OrderedProduct orderProd = new OrderedProduct();
-				orderProd.setName(rs.getString("name"));
-				orderProd.setQuantity(rs.getInt("quantity"));
-				orderProd.setPrice(rs.getFloat("price"));
-				orderProd.setImage(rs.getString("image"));
-				orderProd.setOrderId(oid);
 
-				list.add(orderProd);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return list;
+	public List<OrderedProduct> getAllOrderedProduct(int oid) {
+		String sql = "SELECT * FROM ordered_product WHERE orderid = ?";
+		return jdbcTemplate.query(sql, this::mapRowToOrderedProduct, oid);
 	}
 }

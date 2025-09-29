@@ -1,181 +1,77 @@
 package com.ecommerce.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
+import com.ecommerce.entities.Cart;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
-import com.ecommerce.entities.Cart;
-
+@Repository
 public class CartDao {
 
-	private Connection con;
+	private final JdbcTemplate jdbcTemplate;
 
-	public CartDao(Connection con) {
-		super();
-		this.con = con;
+	public CartDao(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
+
+	// Маппер
+	private Cart mapRowToCart(java.sql.ResultSet rs, int rowNum) throws java.sql.SQLException {
+		Cart cart = new Cart();
+		cart.setCartId(rs.getInt("id"));
+		cart.setUserId(rs.getInt("uid"));
+		cart.setProductId(rs.getInt("pid"));
+		cart.setQuantity(rs.getInt("quantity"));
+		return cart;
 	}
 
 	public boolean addToCart(Cart cart) {
-		boolean flag = false;
-		try {
-			String query = "insert into cart(uid, pid, quantity) values(?,?,?)";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setInt(1, cart.getUserId());
-			psmt.setInt(2, cart.getProductId());
-			psmt.setInt(3, cart.getQuantity());
-
-			psmt.executeUpdate();
-			flag = true;
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return flag;
+		String sql = "INSERT INTO cart(uid, pid, quantity) VALUES(?, ?, ?)";
+		return jdbcTemplate.update(sql, cart.getUserId(), cart.getProductId(), cart.getQuantity()) > 0;
 	}
 
 	public List<Cart> getCartListByUserId(int uid) {
-		List<Cart> list = new ArrayList<Cart>();
-		try {
-			String query = "select * from cart where uid = ?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setInt(1, uid);
-
-			ResultSet rs = psmt.executeQuery();
-			while (rs.next()) {
-				Cart cart = new Cart();
-				cart.setCartId(rs.getInt("id"));
-				cart.setUserId(rs.getInt("uid"));
-				cart.setProductId(rs.getInt("pid"));
-				cart.setQuantity(rs.getInt("quantity"));
-
-				list.add(cart);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return list;
+		String sql = "SELECT * FROM cart WHERE uid = ?";
+		return jdbcTemplate.query(sql, this::mapRowToCart, uid);
 	}
 
 	public int getQuantity(int uid, int pid) {
-		int qty = 0;
-		try {
-			String query = "select * from cart where uid = ? and pid = ?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setInt(1, uid);
-			psmt.setInt(2, pid);
-
-			ResultSet rs = psmt.executeQuery();
-			while (rs.next()) {
-				qty = rs.getInt("quantity");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return qty;
+		String sql = "SELECT quantity FROM cart WHERE uid = ? AND pid = ?";
+		return jdbcTemplate.queryForObject(sql, Integer.class, uid, pid);
 	}
 
 	public int getQuantityById(int id) {
-		int qty = 0;
-		try {
-			String query = "select * from cart where id = ?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setInt(1, id);
-			ResultSet rs = psmt.executeQuery();
-			while (rs.next()) {
-				qty = rs.getInt("quantity");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return qty;
+		String sql = "SELECT quantity FROM cart WHERE id = ?";
+		return jdbcTemplate.queryForObject(sql, Integer.class, id);
 	}
 
 	public void updateQuantity(int id, int qty) {
-
-		try {
-			String query = "update cart set quantity = ? where id = ?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setInt(1, qty);
-			psmt.setInt(2, id);
-
-			psmt.executeUpdate();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		String sql = "UPDATE cart SET quantity = ? WHERE id = ?";
+		jdbcTemplate.update(sql, qty, id);
 	}
 
 	public void removeProduct(int cid) {
-		try {
-			String query = "delete from cart where id = ?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setInt(1, cid);
-
-			psmt.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		String sql = "DELETE FROM cart WHERE id = ?";
+		jdbcTemplate.update(sql, cid);
 	}
 
 	public void removeAllProduct() {
-		try {
-			String query = "delete from cart";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		String sql = "DELETE FROM cart";
+		jdbcTemplate.update(sql);
 	}
 
 	public int getIdByUserIdAndProductId(int uid, int pid) {
-		int cid = 0;
-		try {
-			String query = "select * from cart where uid = ? and pid = ?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setInt(1, uid);
-			psmt.setInt(2, pid);
-
-			ResultSet rs = psmt.executeQuery();
-			while (rs.next()) {
-				cid = rs.getInt("id");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return cid;
+		String sql = "SELECT id FROM cart WHERE uid = ? AND pid = ?";
+		return jdbcTemplate.queryForObject(sql, Integer.class, uid, pid);
 	}
 
 	public int getCartCountByUserId(int uid) {
-		int count = 0;
-		try {
-			String query = "select count(*) from cart where uid=?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setInt(1, uid);
-
-			ResultSet rs = psmt.executeQuery();
-			rs.next();
-			count = rs.getInt(1);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return count;
+		String sql = "SELECT COUNT(*) FROM cart WHERE uid = ?";
+		return jdbcTemplate.queryForObject(sql, Integer.class, uid);
 	}
 
 	public int getProductId(int cid) {
-		int pid = 0;
-		try {
-			String query = "select pid from cart where id=?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setInt(1, cid);
-			ResultSet rs = psmt.executeQuery();
-			rs.next();
-			pid = rs.getInt(1);
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return pid;
+		String sql = "SELECT pid FROM cart WHERE id = ?";
+		return jdbcTemplate.queryForObject(sql, Integer.class, cid);
 	}
 }

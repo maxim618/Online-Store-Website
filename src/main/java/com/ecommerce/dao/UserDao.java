@@ -1,256 +1,126 @@
 package com.ecommerce.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import com.ecommerce.entities.User;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 
-import com.ecommerce.entities.User;
-
+@Repository
 public class UserDao {
 
-	private Connection con;
+	private final JdbcTemplate jdbcTemplate;
 
-	public UserDao(Connection con) {
-		super();
-		this.con = con;
+	public UserDao(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
 	}
 
-	public boolean saveUser(User user) {
-		boolean flag = false;
-
-		try {
-			String query = "insert into user(name, email, password, phone, gender, address, city, pincode, state) values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setString(1, user.getUserName());
-			psmt.setString(2, user.getUserEmail());
-			psmt.setString(3, user.getUserPassword());
-			psmt.setString(4, user.getUserPhone());
-			psmt.setString(5, user.getUserGender());
-			psmt.setString(6, user.getUserAddress());
-			psmt.setString(7, user.getUserCity());
-			psmt.setString(8, user.getUserPincode());
-			psmt.setString(9, user.getUserState());
-
-			psmt.executeUpdate();
-			flag = true;
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return flag;
-	}
-
-	public User getUserByEmailPassword(String userEmail, String userPassword) {
-		User user = null;
-		try {
-			String query = "select * from user where email = ? and password = ?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setString(1, userEmail);
-			psmt.setString(2, userPassword);
-
-			ResultSet set = psmt.executeQuery();
-			while (set.next()) {
-				user = new User();
-
-				user.setUserId(set.getInt("userid"));
-				user.setUserName(set.getString("name"));
-				user.setUserEmail(set.getString("email"));
-				user.setUserPassword(set.getString("password"));
-				user.setUserPhone(set.getString("phone"));
-				user.setUserGender(set.getString("gender"));
-				user.setDateTime(set.getTimestamp("registerdate"));
-				user.setUserAddress(set.getString("address"));
-				user.setUserCity(set.getString("city"));
-				user.setUserPincode(set.getString("pincode"));
-				user.setUserState(set.getString("state"));
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+	// Маппер для User
+	private User mapRowToUser(ResultSet rs, int rowNum) throws SQLException {
+		User user = new User();
+		user.setUserId(rs.getInt("userid"));
+		user.setUserName(rs.getString("name"));
+		user.setUserEmail(rs.getString("email"));
+		user.setUserPassword(rs.getString("password"));
+		user.setUserPhone(rs.getString("phone"));
+		user.setUserGender(rs.getString("gender"));
+		user.setDateTime(rs.getTimestamp("registerdate"));
+		user.setUserAddress(rs.getString("address"));
+		user.setUserCity(rs.getString("city"));
+		user.setUserPincode(rs.getString("pincode"));
+		user.setUserState(rs.getString("state"));
 		return user;
 	}
 
+	public boolean saveUser(User user) {
+		String sql = "INSERT INTO user(name, email, password, phone, gender, address, city, pincode, state) " +
+				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		return jdbcTemplate.update(sql,
+				user.getUserName(),
+				user.getUserEmail(),
+				user.getUserPassword(),
+				user.getUserPhone(),
+				user.getUserGender(),
+				user.getUserAddress(),
+				user.getUserCity(),
+				user.getUserPincode(),
+				user.getUserState()) > 0;
+	}
+
+	public User getUserByEmailPassword(String userEmail, String userPassword) {
+		String sql = "SELECT * FROM user WHERE email=? AND password=?";
+		List<User> users = jdbcTemplate.query(sql, this::mapRowToUser, userEmail, userPassword);
+		return users.isEmpty() ? null : users.get(0);
+	}
+
 	public List<User> getAllUser() {
-		List<User> list = new ArrayList<User>();
-		try {
-			String query = "select * from user";
-			Statement statement = this.con.createStatement();
-			ResultSet set = statement.executeQuery(query);
-			while (set.next()) {
-				User user = new User();
-				user.setUserId(set.getInt("userid"));
-				user.setUserName(set.getString("name"));
-				user.setUserEmail(set.getString("email"));
-				user.setUserPassword(set.getString("password"));
-				user.setUserPhone(set.getString("phone"));
-				user.setUserGender(set.getString("gender"));
-				user.setDateTime(set.getTimestamp("registerdate"));
-				user.setUserAddress(set.getString("address"));
-				user.setUserCity(set.getString("city"));
-				user.setUserPincode(set.getString("pincode"));
-				user.setUserState(set.getString("state"));
-				
-				list.add(user);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return list;
+		String sql = "SELECT * FROM user";
+		return jdbcTemplate.query(sql, this::mapRowToUser);
 	}
 
 	public void updateUserAddresss(User user) {
-		try {
-			String query = "update user set address = ?, city = ?, pincode = ?, state = ? where userid = ?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setString(1, user.getUserAddress());
-			psmt.setString(2, user.getUserCity());
-			psmt.setString(3, user.getUserPincode());
-			psmt.setString(4, user.getUserState());
-			psmt.setInt(5, user.getUserId());
-
-			psmt.executeUpdate();
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		String sql = "UPDATE user SET address=?, city=?, pincode=?, state=? WHERE userid=?";
+		jdbcTemplate.update(sql,
+				user.getUserAddress(),
+				user.getUserCity(),
+				user.getUserPincode(),
+				user.getUserState(),
+				user.getUserId());
 	}
+
 	public void updateUserPasswordByEmail(String password, String mail) {
-		try {
-			String query = "update user set password = ? where email = ?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setString(1, password);
-			psmt.setString(2, mail);
-			
-			psmt.executeUpdate();
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		String sql = "UPDATE user SET password=? WHERE email=?";
+		jdbcTemplate.update(sql, password, mail);
 	}
 
 	public void updateUser(User user) {
-		try {
-			String query = "update user set name = ?, email = ?, phone = ?, gender = ?, address = ?, city = ?, pincode = ?, state = ? where userid = ?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setString(1, user.getUserName());
-			psmt.setString(2, user.getUserEmail());
-			psmt.setString(3, user.getUserPhone());
-			psmt.setString(4, user.getUserGender());
-			psmt.setString(5, user.getUserAddress());
-			psmt.setString(6, user.getUserCity());
-			psmt.setString(7, user.getUserPincode());
-			psmt.setString(8, user.getUserState());
-			psmt.setInt(9, user.getUserId());
-
-			psmt.executeUpdate();
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		String sql = "UPDATE user SET name=?, email=?, phone=?, gender=?, address=?, city=?, pincode=?, state=? WHERE userid=?";
+		jdbcTemplate.update(sql,
+				user.getUserName(),
+				user.getUserEmail(),
+				user.getUserPhone(),
+				user.getUserGender(),
+				user.getUserAddress(),
+				user.getUserCity(),
+				user.getUserPincode(),
+				user.getUserState(),
+				user.getUserId());
 	}
 
 	public int userCount() {
-		int count = 0;
-		try {
-			String query = "select count(*) from user";
-			Statement stmt = con.createStatement();
-			ResultSet rs = stmt.executeQuery(query);
-			rs.next();
-			count = rs.getInt(1);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return count;
+		String sql = "SELECT COUNT(*) FROM user";
+		return jdbcTemplate.queryForObject(sql, Integer.class);
 	}
 
 	public String getUserAddress(int uid) {
-		String address = "";
-		try {
-			String query = "select address, city, pincode, state from user where userid = ?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setInt(1, uid);
+		String sql = "SELECT CONCAT(address, ', ', city, '-', pincode, ', ', state) FROM user WHERE userid=?";
+		return jdbcTemplate.queryForObject(sql, String.class, uid);
+	}
 
-			ResultSet rs = psmt.executeQuery();
-			rs.next();
-			address = rs.getString(1) + ", " + rs.getString(2) + "-" + rs.getString(3) + ", " + rs.getString(4);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return address;
-	}
 	public String getUserName(int uid) {
-		String name = "";
-		try {
-			String query = "select name from user where userid = ?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setInt(1, uid);
-			
-			ResultSet rs = psmt.executeQuery();
-			rs.next();
-			name = rs.getString(1);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return name;
+		String sql = "SELECT name FROM user WHERE userid=?";
+		return jdbcTemplate.queryForObject(sql, String.class, uid);
 	}
+
 	public String getUserEmail(int uid) {
-		String email = "";
-		try {
-			String query = "select email from user where userid = ?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setInt(1, uid);
-			
-			ResultSet rs = psmt.executeQuery();
-			rs.next();
-			email = rs.getString(1);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return email;
+		String sql = "SELECT email FROM user WHERE userid=?";
+		return jdbcTemplate.queryForObject(sql, String.class, uid);
 	}
+
 	public String getUserPhone(int uid) {
-		String phone = "";
-		try {
-			String query = "select phone from user where userid = ?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setInt(1, uid);
-			
-			ResultSet rs = psmt.executeQuery();
-			rs.next();
-			phone = rs.getString(1);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return phone;
+		String sql = "SELECT phone FROM user WHERE userid=?";
+		return jdbcTemplate.queryForObject(sql, String.class, uid);
 	}
+
 	public void deleteUser(int uid) {
-		try {
-			String query = "delete from user where userid = ?";
-			PreparedStatement psmt = this.con.prepareStatement(query);
-			psmt.setInt(1, uid);
-			psmt.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		String sql = "DELETE FROM user WHERE userid=?";
+		jdbcTemplate.update(sql, uid);
 	}
+
 	public List<String> getAllEmail() {
-		List<String> list = new ArrayList<>();
-		try {
-			String query = "select email from user";
-			Statement statement = this.con.createStatement();
-			ResultSet set = statement.executeQuery(query);
-			while (set.next()) {
-				list.add(set.getString(1));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return list;
+		String sql = "SELECT email FROM user";
+		return jdbcTemplate.queryForList(sql, String.class);
 	}
 }
