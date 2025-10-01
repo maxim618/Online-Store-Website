@@ -7,8 +7,11 @@ import com.ecommerce.dao.ProductDao;
 import com.ecommerce.entities.*;
 import com.ecommerce.helper.MailMessenger;
 import com.ecommerce.helper.OrderIdGenerator;
+import com.ecommerce.service.OrderService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -18,83 +21,39 @@ import java.util.List;
 @Controller
 public class OrderController {
 
-    private final OrderDao orderDao;
-    private final CartDao cartDao;
-    private final OrderedProductDao orderedProductDao;
-    private final ProductDao productDao;
+    private final OrderService orderService;
 
-    public OrderController(OrderDao orderDao,
-                           CartDao cartDao,
-                           OrderedProductDao orderedProductDao,
-                           ProductDao productDao) {
-        this.orderDao = orderDao;
-        this.cartDao = cartDao;
-        this.orderedProductDao = orderedProductDao;
-        this.productDao = productDao;
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
     }
 
-    @PostMapping("/order")
-    public String handleOrder(
-            @RequestParam("payementMode") String paymentType,
-            HttpSession session) {
-
-        String from = (String) session.getAttribute("from");
+    // просмотр заказов пользователя
+    @GetMapping("/orders")
+    public String viewOrders(HttpSession session, Model model) {
         User user = (User) session.getAttribute("activeUser");
-        String orderId = OrderIdGenerator.getOrderId();
-        String status = "Order Placed";
+        if (user == null) return "redirect:/login";
 
-        if ("cart".equalsIgnoreCase(from)) {
-            // заказ из корзины
-            int orderDbId = orderDao.insertOrder(new Order(orderId, status, paymentType, user.getUserId()));
+        model.addAttribute("orders", orderService.getOrdersByUserId(user.getUserId()));
+        return "order"; // order.jsp
+    }
 
-            List<Cart> cartItems = cartDao.getCartListByUserId(user.getUserId());
-            for (Cart item : cartItems) {
-                Product prod = productDao.getProductsByProductId(item.getProductId());
-                OrderedProduct orderedProduct = new OrderedProduct(
-                        prod.getProductName(),
-                        item.getQuantity(),
-                        prod.getProductPriceAfterDiscount(),
-                        prod.getProductImages(),
-                        orderDbId
-                );
-                orderedProductDao.insertOrderedProduct(orderedProduct);
-            }
+    // создание заказа (например, с checkout.jsp)
+    @PostMapping("/order/place")
+    public String placeOrder(HttpSession session,
+                             @RequestParam("paymentType") String paymentType) {
+        User user = (User) session.getAttribute("activeUser");
+        if (user == null) return "redirect:/login";
 
-            cartDao.removeAllProduct();
-            session.removeAttribute("from");
-            session.removeAttribute("totalPrice");
+        Order order = new Order();
+        order.setOrderId(java.util.UUID.randomUUID().toString());
+        order.setStatus("Pending");
+        order.setPaymentType(paymentType);
+        order.setUserId(user.getUserId());
 
-        } else if ("buy".equalsIgnoreCase(from)) {
-            // заказ одного товара (Buy Now)
-            int pid = (int) session.getAttribute("pid");
-            int orderDbId = orderDao.insertOrder(new Order(orderId, status, paymentType, user.getUserId()));
+        orderService.placeOrder(order);
 
-            Product prod = productDao.getProductsByProductId(pid);
-            OrderedProduct orderedProduct = new OrderedProduct(
-                    prod.getProductName(),
-                    1,
-                    prod.getProductPriceAfterDiscount(),
-                    prod.getProductImages(),
-                    orderDbId
-            );
-            orderedProductDao.insertOrderedProduct(orderedProduct);
-
-            productDao.updateQuantity(pid, productDao.getProductQuantityById(pid) - 1);
-
-            session.removeAttribute("from");
-            session.removeAttribute("pid");
-        }
-
-        session.setAttribute("order", "success");
-
-        // уведомление по email
-        MailMessenger.successfullyOrderPlaced(
-                user.getUserName(),
-                user.getUserEmail(),
-                orderId,
-                new Date().toString()
-        );
-
-        return "redirect:/"; // index.jsp
+        // flash message
+        session.setAttribute("order", "placed");
+        return "redirect:/checkout";
     }
 }

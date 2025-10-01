@@ -9,6 +9,7 @@ public class Order {
 	private String status;
 	private Timestamp date;
 	private String payementType;
+	private String paymentType;   // 🔹 новое поле
 	private int userId;
 	
 	public Order() {
@@ -78,6 +79,12 @@ public class Order {
 
 	public void setUserId(int userId) {
 		this.userId = userId;
+	}
+	public String getPaymentType() {
+		return paymentType;
+	}
+	public void setPaymentType(String paymentType) {
+		this.paymentType = paymentType;
 	}
 
 	

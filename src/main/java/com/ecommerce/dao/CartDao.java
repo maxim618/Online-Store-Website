@@ -74,4 +74,10 @@ public class CartDao {
 		String sql = "SELECT pid FROM cart WHERE id = ?";
 		return jdbcTemplate.queryForObject(sql, Integer.class, cid);
 	}
+	public int getTotalCartPriceByUserId(int uid) {
+		String sql = "SELECT COALESCE(SUM(p.price * c.quantity), 0) " +
+				"FROM cart c JOIN products p ON c.pid = p.id WHERE c.uid = ?";
+		return jdbcTemplate.queryForObject(sql, Integer.class, uid);
+	}
+
 }
