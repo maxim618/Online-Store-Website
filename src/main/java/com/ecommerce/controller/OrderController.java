@@ -1,22 +1,20 @@
 package com.ecommerce.controller;
 
-import com.ecommerce.dao.CartDao;
-import com.ecommerce.dao.OrderDao;
-import com.ecommerce.dao.OrderedProductDao;
-import com.ecommerce.dao.ProductDao;
-import com.ecommerce.entities.*;
-import com.ecommerce.helper.MailMessenger;
-import com.ecommerce.helper.OrderIdGenerator;
+import com.ecommerce.entities.Message;
+import com.ecommerce.entities.Order;
+import com.ecommerce.entities.User;
 import com.ecommerce.service.OrderService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.Date;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Controller
 public class OrderController {
@@ -27,33 +25,49 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    // просмотр заказов пользователя
-    @GetMapping("/orders")
-    public String viewOrders(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("activeUser");
-        if (user == null) return "redirect:/login";
-
-        model.addAttribute("orders", orderService.getOrdersByUserId(user.getUserId()));
-        return "order"; // order.jsp
-    }
-
-    // создание заказа (например, с checkout.jsp)
+    // 📦 создание нового заказа
     @PostMapping("/order/place")
-    public String placeOrder(HttpSession session,
-                             @RequestParam("paymentType") String paymentType) {
+    public String placeOrder(HttpSession session, RedirectAttributes ra) {
         User user = (User) session.getAttribute("activeUser");
-        if (user == null) return "redirect:/login";
+        if (user == null) {
+            ra.addFlashAttribute("message",
+                    new Message("Please login to place an order.", "Error!", "alert-danger"));
+            return "redirect:/login";
+        }
 
         Order order = new Order();
-        order.setOrderId(java.util.UUID.randomUUID().toString());
-        order.setStatus("Pending");
-        order.setPaymentType(paymentType);
+        order.setOrderId(UUID.randomUUID().toString());
+        order.setStatus("Placed");
+        order.setPaymentType("COD"); // можно из формы
         order.setUserId(user.getUserId());
+        order.setDate(LocalDateTime.now());
 
-        orderService.placeOrder(order);
+        boolean saved = orderService.placeOrder(order);
 
-        // flash message
-        session.setAttribute("order", "placed");
-        return "redirect:/checkout";
+        if (saved) {
+            ra.addFlashAttribute("message",
+                    new Message("Your order has been placed successfully!", "Success!", "alert-success"));
+        } else {
+            ra.addFlashAttribute("message",
+                    new Message("Failed to place order. Try again later.", "Error!", "alert-danger"));
+        }
+
+        return "redirect:/order";
+    }
+
+    // 📑 просмотр заказов пользователя
+    @GetMapping("/order")
+    public String viewOrders(HttpSession session, Model model, RedirectAttributes ra) {
+        User user = (User) session.getAttribute("activeUser");
+        if (user == null) {
+            ra.addFlashAttribute("message",
+                    new Message("You must login to see your orders.", "Error!", "alert-danger"));
+            return "redirect:/login";
+        }
+
+        List<Order> orders = orderService.getOrdersByUserId(user.getUserId());
+        model.addAttribute("orders", orders);
+
+        return "order"; // order.jsp
     }
 }
