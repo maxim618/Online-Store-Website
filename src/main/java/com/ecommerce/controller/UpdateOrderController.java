@@ -35,6 +35,7 @@ public class UpdateOrderController {
         // Если заказ "Shipped" или "Out For Delivery" — отправляем уведомление
         if ("Shipped".equalsIgnoreCase(status.trim()) || "Out For Delivery".equalsIgnoreCase(status.trim())) {
             Order order = orderDao.getOrderById(oid);
+
             String userName = userDao.getUserName(order.getUserId());
             String userEmail = userDao.getUserEmail(order.getUserId());
             MailMessenger.orderShipped(userName, userEmail, order.getOrderId(), order.getDate().toString());
