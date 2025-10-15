@@ -1,6 +1,8 @@
 package com.ecommerce.dao;
 
 import com.ecommerce.entities.User;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -123,4 +125,23 @@ public class UserDao {
 		String sql = "SELECT email FROM user";
 		return jdbcTemplate.queryForList(sql, String.class);
 	}
+	public User getUserById(int uid) {
+		String sql = "SELECT * FROM user WHERE userid = ?";
+		List<User> users = jdbcTemplate.query(sql, this::mapRowToUser, uid);
+		return users.isEmpty() ? null : users.get(0);
+	}
+	public boolean existsByEmail(String email) {
+		String sql = "SELECT COUNT(*) FROM user WHERE email = ?";
+		Integer count = jdbcTemplate.queryForObject(sql, Integer.class, email);
+		return count != null && count > 0;
+	}
+	public User findByEmail(String email) {
+		String sql = "SELECT * FROM users WHERE email = ?";
+		try {
+			return jdbcTemplate.queryForObject(sql, new Object[]{email}, new BeanPropertyRowMapper<>(User.class));
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
 }
