@@ -1,42 +1,34 @@
 package com.ecommerce.entities;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 public class Order {
-	
 	private int id;
 	private String orderId;
 	private String status;
-	private Timestamp date;
-	private String payementType;
-	private String paymentType;   // 🔹 новое поле
+	private LocalDateTime date;   // 👈 современный тип вместо Timestamp
+	private String paymentType;   // 👈 одно поле, без дубля
 	private int userId;
-	
+
 	public Order() {
-		super();
 	}
 
-	public Order(String orderId, String status, Timestamp date, String payementType, int userId) {
-		super();
+	public Order(String orderId, String status, LocalDateTime date, String paymentType, int userId) {
 		this.orderId = orderId;
 		this.status = status;
 		this.date = date;
-		this.payementType = payementType;
+		this.paymentType = paymentType;
 		this.userId = userId;
 	}
 
-	public Order(String orderId, String status, String payementType, int userId) {
-		super();
-		this.orderId = orderId;
-		this.status = status;
-		this.payementType = payementType;
-		this.userId = userId;
+	public Order(String orderId, String status, String paymentType, int userId) {
+		this(orderId, status, LocalDateTime.now(), paymentType, userId); // 👈 дата по умолчанию = now()
 	}
 
+	// getters / setters
 	public int getId() {
 		return id;
 	}
-
 	public void setId(int id) {
 		this.id = id;
 	}
@@ -44,7 +36,6 @@ public class Order {
 	public String getOrderId() {
 		return orderId;
 	}
-
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
 	}
@@ -52,34 +43,17 @@ public class Order {
 	public String getStatus() {
 		return status;
 	}
-
 	public void setStatus(String status) {
 		this.status = status;
 	}
 
-	public Timestamp getDate() {
+	public LocalDateTime getDate() {
 		return date;
 	}
-
-	public void setDate(Timestamp date) {
+	public void setDate(LocalDateTime date) {
 		this.date = date;
 	}
 
-	public String getPayementType() {
-		return payementType;
-	}
-
-	public void setPayementType(String payementType) {
-		this.payementType = payementType;
-	}
-
-	public int getUserId() {
-		return userId;
-	}
-
-	public void setUserId(int userId) {
-		this.userId = userId;
-	}
 	public String getPaymentType() {
 		return paymentType;
 	}
@@ -87,5 +61,10 @@ public class Order {
 		this.paymentType = paymentType;
 	}
 
-	
+	public int getUserId() {
+		return userId;
+	}
+	public void setUserId(int userId) {
+		this.userId = userId;
+	}
 }
