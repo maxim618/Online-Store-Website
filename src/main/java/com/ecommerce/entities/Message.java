@@ -1,40 +1,37 @@
 package com.ecommerce.entities;
 
 public class Message {
-	private String message;
-	private String messageType;
-	private String cssClass;
+	private String content;   // Основной текст сообщения
+	private String title;     // Заголовок (например "Success", "Error")
+	private String type;      // Bootstrap класс: alert-success, alert-danger, alert-warning
 
-	public Message() {
+	public Message(String content, String title, String type) {
+		this.content = content;
+		this.title = title;
+		this.type = type;
 	}
 
-	public Message(String message, String messageType, String cssClass) {
-		this.message = message;
-		this.messageType = messageType;
-		this.cssClass = cssClass;
+	public String getContent() {
+		return content;
 	}
 
-	public String getMessage() {
-		return message;
+	public void setContent(String content) {
+		this.content = content;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
+	public String getTitle() {
+		return title;
 	}
 
-	public String getMessageType() {
-		return messageType;
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
-	public void setMessageType(String messageType) {
-		this.messageType = messageType;
+	public String getType() {
+		return type;
 	}
 
-	public String getCssClass() {
-		return cssClass;
-	}
-
-	public void setCssClass(String cssClass) {
-		this.cssClass = cssClass;
+	public void setType(String type) {
+		this.type = type;
 	}
 }
