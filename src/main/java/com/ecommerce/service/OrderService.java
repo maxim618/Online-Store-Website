@@ -25,4 +25,17 @@ public class OrderService {
     public void updateOrderStatus(int id, String status) {
         orderDao.updateOrderStatus(id, status);
     }
+
+    // ✅ для админки — список всех заказов
+    public List<Order> getAllOrders() {
+        return orderDao.getAllOrders();
+    }
+    /** ✅ Получить заказ по id (PK) */
+    public Order getOrderById(int id) {
+        return orderDao.getOrderById(id);
+    }
+    /** (опционально) По строковому orderId */
+    public Order getOrderByOrderId(String orderId) {
+        return orderDao.getOrderByOrderId(orderId);
+    }
 }
