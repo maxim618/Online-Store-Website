@@ -18,11 +18,15 @@ public class WishlistService {
         return wishlistDao.getListByUserId(userId);
     }
 
-    public void addToWishlist(Wishlist wishlist) {
-        wishlistDao.addToWishlist(wishlist);
+    public boolean addToWishlist(Wishlist wishlist) {
+        return wishlistDao.addToWishlist(wishlist);
     }
 
-    public void removeFromWishlist(int userId, int productId) {
+    public void deleteWishlist(int userId, int productId) {
         wishlistDao.deleteWishlist(userId, productId);
+    }
+
+    public boolean existsInWishlist(int userId, int productId) {
+        return wishlistDao.getWishlist(userId, productId);
     }
 }
