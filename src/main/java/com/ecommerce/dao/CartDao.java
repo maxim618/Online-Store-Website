@@ -76,7 +76,7 @@ public class CartDao {
 	}
 	public int getTotalCartPriceByUserId(int uid) {
 		String sql = "SELECT COALESCE(SUM(p.price * c.quantity), 0) " +
-				"FROM cart c JOIN products p ON c.pid = p.id WHERE c.uid = ?";
+				"FROM cart c JOIN product p ON c.pid = p.pid WHERE c.uid = ?";
 		return jdbcTemplate.queryForObject(sql, Integer.class, uid);
 	}
 
