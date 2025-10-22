@@ -136,7 +136,7 @@ public class UserDao {
 		return count != null && count > 0;
 	}
 	public User findByEmail(String email) {
-		String sql = "SELECT * FROM users WHERE email = ?";
+		String sql = "SELECT * FROM user WHERE email = ?";
 		try {
 			return jdbcTemplate.queryForObject(sql, new Object[]{email}, new BeanPropertyRowMapper<>(User.class));
 		} catch (EmptyResultDataAccessException e) {
