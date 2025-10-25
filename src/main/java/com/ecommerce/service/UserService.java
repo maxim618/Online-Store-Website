@@ -4,6 +4,7 @@ import com.ecommerce.dao.UserDao;
 import com.ecommerce.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,10 +26,12 @@ public class UserService {
         return userDao.getUserById(id);
     }
 
+    @Transactional
     public void updateUser(User user) {
         userDao.updateUser(user);
     }
 
+    @Transactional
     public boolean saveUser(User user) {
         return userDao.saveUser(user);
     }
@@ -45,6 +48,7 @@ public class UserService {
         return userDao.findByEmail(email);
     }
 
+    @Transactional
     public void updateUserPasswordByEmail(String newPassword, String email) {
         userDao.updateUserPasswordByEmail(newPassword, email);
     }
