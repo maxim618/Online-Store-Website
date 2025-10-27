@@ -3,6 +3,7 @@
 <%@page import="com.ecommerce.dao.ProductDao"%>
 <%@page import="com.ecommerce.entities.Cart"%>
 <%@page import="com.ecommerce.dao.CartDao"%>
+<%@ page import="com.ecommerce.entities.User" %>
 <%@page errorPage="error_exception.jsp"%>
 
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
