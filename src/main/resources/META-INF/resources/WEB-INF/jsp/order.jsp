@@ -1,39 +1,45 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="UTF-8">
 	<title>My Orders</title>
 	<%@ include file="common_css_js.jsp" %>
 </head>
 <body>
 <%@ include file="navbar.jsp" %>
 
-<div class="container my-4">
-	<h2>My Orders</h2>
+<div class="container mt-5">
+	<%@ include file="alert_message.jsp" %>
+
+	<h3>My Orders</h3>
+	<hr/>
 
 	<c:if test="${empty orders}">
-		<p>You have no orders yet.</p>
+		<div class="text-center">
+			<img src="${pageContext.request.contextPath}/Images/order.png" style="max-width:150px;">
+			<h5 class="mt-3">You have no orders yet.</h5>
+		</div>
 	</c:if>
 
 	<c:if test="${not empty orders}">
-		<table class="table table-bordered">
+		<table class="table table-hover">
 			<thead>
 			<tr>
 				<th>Order ID</th>
-				<th>Date</th>
 				<th>Status</th>
-				<th>Payment Type</th>   <!--  новое поле -->
+				<th>Payment</th>
+				<th>Date</th>
 			</tr>
 			</thead>
 			<tbody>
 			<c:forEach var="o" items="${orders}">
 				<tr>
 					<td>${o.orderId}</td>
-					<td>${o.date}</td>
 					<td>${o.status}</td>
-					<td>${o.paymentType}</td> <!--  выводим -->
+					<td>${o.paymentType}</td>
+					<td>${o.date}</td>
 				</tr>
 			</c:forEach>
 			</tbody>
