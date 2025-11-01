@@ -1,134 +1,43 @@
-<%@page import="com.ecommerce.entities.Message"%>
-<%@page import="com.ecommerce.entities.User"%>
-<%@page errorPage="error_exception.jsp"%>
-<%
-User activeUser = (User) session.getAttribute("activeUser");
-if (activeUser == null) {
-	Message message = new Message("You are not logged in! Login first!!", "error", "alert-danger");
-	session.setAttribute("message", message);
-	response.sendRedirect("login.jsp");
-	return;  
-}
-%>  
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
+<div class="container my-4">
+	<h2>My Profile</h2>
+	<hr>
 
-<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-	pageEncoding="ISO-8859-1"%>
+	<c:if test="${empty user}">
+		<p class="text-danger">User not found or not logged in.</p>
+	</c:if>
 
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="ISO-8859-1">
-<title>My Profile</title>
-<%@include file="common_css_js.jsp"%>
-<style>
-.cus-active {
-	background-color: #e6eefa !important;
-	width: 100%;
-}
+	<c:if test="${not empty user}">
+		<table class="table table-bordered">
+			<tr>
+				<th>User ID</th>
+				<td>${user.userId}</td>
+			</tr>
+			<tr>
+				<th>Name</th>
+				<td>${user.userName}</td>
+			</tr>
+			<tr>
+				<th>Email</th>
+				<td>${user.userEmail}</td>
+			</tr>
+			<tr>
+				<th>Phone</th>
+				<td>${user.userPhone}</td>
+			</tr>
+			<tr>
+				<th>Address</th>
+				<td>${user.userAddress}, ${user.userCity} - ${user.userPincode}, ${user.userState}</td>
+			</tr>
+			<tr>
+				<th>Registered</th>
+				<td>${user.dateTime}</td>
+			</tr>
+		</table>
 
-.list-btn {
-	font-size: 20px !important;
-}
-
-.list-btn:hover {
-	color: #2874f0 !important;
-}
-</style>
-</head>
-<body>
-	<!--navbar -->
-	<%@include file="navbar.jsp"%>
-
-	<div class="container-fluid px-3 py-5">
-		<div class="row">
-			<div class="col-md-3">
-				<div class="card">
-					<div class="row mt-2 mb-2">
-						<div class="col-md-4">
-							<div class="container text-center">
-								<img src="../../../../../java/com/ecommerce/webapp/Images/profile.png" style="max-width: 60px;"
-									 class="img-fluid">
-							</div>
-						</div>
-						<div class="col-md-8">
-							Hello, <br>
-							<h5><%=activeUser.getUserName()%></h5>
-						</div>
-					</div>  
-				</div>
-
-				<div class="card mt-3">
-					<div class="list-group">
-						<button type="button" id="profile-btn"
-							class="list-group-item list-group-item-action cus-active list-btn"
-							aria-current="true">Profile Information</button>
-						<button type="button" id="wishlist-btn"
-							class="list-group-item list-group-item-action list-btn">My
-							Wishlist</button>
-						<button type="button" id="order-btn"
-							class="list-group-item list-group-item-action list-btn">My
-							Orders</button>
-						<button type="button" id="logout-btn"
-							class="list-group-item list-group-item-action list-btn"
-							onclick="window.open('${pageContext.request.contextPath}/logout/user', '_self')">Logout</button>
-					</div>
-				</div>
-			</div>
-			<div class="col-md-9">
-				<div class="card">
-					<div id="profile">
-						<%@include file="alert_message.jsp"%>
-						<%@include file="personalInfo.jsp"%>
-					</div>
-					<div id="wishlist" style="display: none;">
-						<%@include file="wishlist.jsp"%>  
-					</div>
-					<div id="order" style="display: none;">
-						<%@include file="order.jsp"%>    
-					</div>
-				</div>
-			</div>  
-		</div>
-	</div>
-
-	<script>
-		$(document).ready(function() {
-
-			$('#profile-btn').click(function() {
-
-				$('#profile').show();
-				$('#wishlist').hide();
-				$('#order').hide();
-				
-				$(this).addClass('cus-active');
-				$('#wishlist-btn').removeClass('cus-active');
-				$('#order-btn').removeClass('cus-active');
-				
-
-			});
-			$('#wishlist-btn').click(function() {
-
-				$('#wishlist').show();
-				$('#profile').hide();
-				$('#order').hide();
-				
-				$(this).addClass('cus-active');
-				$('#profile-btn').removeClass('cus-active');
-				$('#order-btn').removeClass('cus-active');
-				
-			});
-			$('#order-btn').click(function() {
-
-				$('#order').show();
-				$('#profile').hide();
-				$('#wishlist').hide();
-				
-				$(this).addClass('cus-active');
-				$('#profile-btn').removeClass('cus-active');
-				$('#wishlist-btn').removeClass('cus-active');
-			});
-		});
-	</script>
-</body>
-</html>
+		<!-- ✅ кнопка перехода на редактирование -->
+		<a href="${pageContext.request.contextPath}/user/edit" class="btn btn-primary">Edit Profile</a>
+	</c:if>
+</div>
