@@ -1,6 +1,6 @@
 package com.ecommerce.controller;
 
-import com.ecommerce.dao.OrderDao;
+import com.ecommerce.dao.OrderDaoLegacy;
 import com.ecommerce.dao.UserDaoLegacy;
 import com.ecommerce.entities.Order;
 import com.ecommerce.helper.MailMessenger;
@@ -14,10 +14,10 @@ import java.io.IOException;
 @RequestMapping("/order/update")
 public class UpdateOrderController {
 
-    private final OrderDao orderDao;
+    private final OrderDaoLegacy orderDao;
     private final UserDaoLegacy userDao;
 
-    public UpdateOrderController(OrderDao orderDao, UserDaoLegacy userDao) {
+    public UpdateOrderController(OrderDaoLegacy orderDao, UserDaoLegacy userDao) {
         this.orderDao = orderDao;
         this.userDao = userDao;
 

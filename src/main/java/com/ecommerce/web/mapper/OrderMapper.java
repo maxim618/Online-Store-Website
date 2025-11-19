@@ -15,5 +15,6 @@ public interface OrderMapper {
     OrderItemDto toItemDto(OrderItem item);
 
     @Mapping(target = "orderId", source = "id")
+    @Mapping(target = "items", expression = "java(order.getItems().stream().map(this::toItemDto).toList())")
     OrderDto toDto(Order order);
 }

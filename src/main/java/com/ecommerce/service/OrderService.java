@@ -1,6 +1,6 @@
 package com.ecommerce.service;
 
-import com.ecommerce.dao.OrderDao;
+import com.ecommerce.dao.OrderDaoLegacy;
 import com.ecommerce.entities.Order;
 import org.springframework.stereotype.Service;
 
@@ -8,9 +8,9 @@ import java.util.List;
 
 @Service
 public class OrderService {
-    private final OrderDao orderDao;
+    private final OrderDaoLegacy orderDao;
 
-    public OrderService(OrderDao orderDao) {
+    public OrderService(OrderDaoLegacy orderDao) {
         this.orderDao = orderDao;
     }
 
