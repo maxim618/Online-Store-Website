@@ -15,23 +15,24 @@ public class AuthController {
     public AuthController(UserService userService){
         this.userService = userService;
     }
+
     @PostMapping("/login")
-    String login (
+    String login(
             @RequestParam String email,
             @RequestParam String password,
-            HttpSession session) {
+            HttpSession session){
 
         if (userService.validateCredentials(email,password)) {
             session.setAttribute("user", userService.getByEmail(email));
             return "redirect:/";
         }
+
         session.setAttribute("error", "invalid credentials");
         return "redirect:/login";
-
     }
 
     @PostMapping("/register")
-    public String register (
+    public String register(
             @RequestParam String email,
             @RequestParam String name,
             @RequestParam String password,
@@ -45,8 +46,5 @@ public class AuthController {
             session.setAttribute("error", e.getMessage());
             return "redirect: register/";
         }
-
-
     }
-
 }
