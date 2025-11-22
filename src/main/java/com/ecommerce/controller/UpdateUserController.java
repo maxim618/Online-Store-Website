@@ -1,6 +1,6 @@
 package com.ecommerce.controller;
 
-import com.ecommerce.dao.UserDao;
+import com.ecommerce.dao.UserDaoLegacy;
 import com.ecommerce.entities.Message;
 import com.ecommerce.entities.User;
 import jakarta.servlet.http.HttpSession;
@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user")
 public class UpdateUserController {
 
-    private final UserDao userDao;
+    private final UserDaoLegacy userDao;
 
-    public UpdateUserController(UserDao userDao) {
+    public UpdateUserController(UserDaoLegacy userDao) {
         this.userDao = userDao;
     }
 

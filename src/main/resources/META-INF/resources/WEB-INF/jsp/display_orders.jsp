@@ -1,5 +1,5 @@
 <%@page import="com.ecommerce.entities.Message"%>
-<%@page import="com.ecommerce.dao.UserDao"%>
+<%@page import="com.ecommerce.dao.UserDaoLegacy"%>
 <%@page errorPage="error_exception.jsp"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
@@ -21,7 +21,7 @@ if (activeAdmin == null) {
 OrderDao orderDao = new OrderDao(ConnectionProvider.getConnection());
 OrderedProductDao ordProdDao = new OrderedProductDao(ConnectionProvider.getConnection());
 List<Order> orderList = orderDao.getAllOrder();
-UserDao userDao = new UserDao(ConnectionProvider.getConnection());
+UserDaoLegacy userDao = new UserDaoLegacy(ConnectionProvider.getConnection());
 %>
 <!DOCTYPE html>
 <html>

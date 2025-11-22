@@ -2,7 +2,7 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
 	<%@page errorPage="error_exception.jsp"%>
-<%@page import="com.ecommerce.dao.UserDao"%>
+<%@page import="com.ecommerce.dao.UserDaoLegacy"%>
 <%@page import="com.ecommerce.entities.Product"%>
 <%@page import="com.ecommerce.dao.ProductDao"%>
 <%
@@ -13,7 +13,7 @@ if (activeAdmin == null) {
 	response.sendRedirect("adminlogin.jsp");
 	return;
 }
-UserDao userDao = new UserDao(ConnectionProvider.getConnection());
+UserDaoLegacy userDao = new UserDaoLegacy(ConnectionProvider.getConnection());
 ProductDao productDao = new ProductDao(ConnectionProvider.getConnection());
 %>
 <!DOCTYPE html>

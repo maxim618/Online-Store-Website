@@ -1,6 +1,6 @@
 package com.ecommerce.service;
 
-import com.ecommerce.dao.UserDao;
+import com.ecommerce.dao.UserDaoLegacy;
 import com.ecommerce.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,9 +12,9 @@ import java.util.List;
 public class UserService {
 
     @Autowired
-    private UserDao userDao;
+    private UserDaoLegacy userDao;
 
-    public UserService(UserDao userDao) {
+    public UserService(UserDaoLegacy userDao) {
         this.userDao = userDao;
     }
 
