@@ -5,7 +5,7 @@ import com.ecommerce.web.dto.RegisterRequest;
 import com.ecommerce.web.dto.UserDto;
 
 public interface UserService {
-    UserDto register(RegisterRequest request);
+    void register(String email, String name, String password);
 
     UserEntity loadUserByEmail(String email); // нужно для Security
 
