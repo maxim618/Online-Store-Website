@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 public class OrderDto {
-    private Long orderId;
+    private Long id;
     private LocalDateTime createdAt;
     private Double totalPrice;
     private List<OrderItemDto> items;

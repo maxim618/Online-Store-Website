@@ -8,4 +8,5 @@ import java.util.List;
 public class CartDto {
     private List<CartItemDto> items;
     private Double totalPrice;
+    private Integer totalQuantity;
 }

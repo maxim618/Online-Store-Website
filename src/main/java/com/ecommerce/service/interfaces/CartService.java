@@ -3,8 +3,16 @@ package com.ecommerce.service.interfaces;
 import com.ecommerce.web.dto.CartDto;
 
 public interface CartService {
-    void add(Long userId, Long productId, Integer quantity);
-    void remove(Long userId, Long productId);
+
+    void addItem(Long userId, Long productId, int quantity);
+
+    void setItemQuantity(Long userId, Long productId, int quantity);
+
+    void removeItem(Long userId, Long productId);
+
+    void clearCart(Long userId);
+
     CartDto getUserCart(Long userId);
-    void clear(Long userId);
+
+    long getCartItemCount(Long userId);
 }

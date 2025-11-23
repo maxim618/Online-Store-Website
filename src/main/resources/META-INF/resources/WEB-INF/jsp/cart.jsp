@@ -2,7 +2,7 @@
 <%@page import="com.ecommerce.entities.Product"%>
 <%@page import="com.ecommerce.dao.ProductDao"%>
 <%@page import="com.ecommerce.entities.Cart"%>
-<%@page import="com.ecommerce.dao.CartDao"%>
+<%@page import="com.ecommerce.dao.CartDaoLegacy"%>
 <%@ page import="com.ecommerce.entities.User" %>
 <%@page errorPage="error_exception.jsp"%>
 
@@ -42,7 +42,7 @@ if (activeUser == null) {
 
 	<%
 	float totalPrice = 0;
-	CartDao cartDao = new CartDao(ConnectionProvider.getConnection());
+	CartDaoLegacy cartDao = new CartDaoLegacy(ConnectionProvider.getConnection());
 	List<Cart> listOfCart = cartDao.getCartListByUserId(user.getUserId());
 	if (listOfCart == null || listOfCart.size() == 0) {
 	%>
