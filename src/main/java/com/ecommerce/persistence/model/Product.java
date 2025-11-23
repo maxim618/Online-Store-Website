@@ -24,12 +24,13 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
 
     private String  title;
     private String  description;
     private Double  price;
     private Integer quantity;
+    private Integer discount;
 
     @Column(name = "image_url")
     private String imageUrl;

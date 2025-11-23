@@ -6,8 +6,8 @@
 <%@page import="com.ecommerce.entities.OrderedProduct"%>
 <%@page import="com.ecommerce.entities.Order"%>
 <%@page import="java.util.List"%>
-<%@page import="com.ecommerce.dao.OrderedProductDao"%>
-<%@page import="com.ecommerce.dao.OrderDao"%>
+<%@page import="com.ecommerce.dao.OrderedProductDaoLegacy"%>
+<%@page import="com.ecommerce.dao.OrderDaoLegacy"%>
 <%@page import="com.ecommerce.helper.ConnectionProvider"%>
 
 <%
@@ -18,8 +18,8 @@ if (activeAdmin == null) {
 	response.sendRedirect("adminlogin.jsp");
 	return;
 }
-OrderDao orderDao = new OrderDao(ConnectionProvider.getConnection());
-OrderedProductDao ordProdDao = new OrderedProductDao(ConnectionProvider.getConnection());
+OrderDaoLegacy orderDao = new OrderDaoLegacy(ConnectionProvider.getConnection());
+OrderedProductDaoLegacy ordProdDao = new OrderedProductDaoLegacy(ConnectionProvider.getConnection());
 List<Order> orderList = orderDao.getAllOrder();
 UserDaoLegacy userDao = new UserDaoLegacy(ConnectionProvider.getConnection());
 %>

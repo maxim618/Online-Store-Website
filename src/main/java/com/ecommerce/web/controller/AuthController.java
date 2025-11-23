@@ -1,50 +1,33 @@
 package com.ecommerce.web.controller;
 
+import com.ecommerce.service.interfaces.AuthService;
 import com.ecommerce.service.interfaces.UserService;
+import com.ecommerce.web.dto.AuthResponse;
+import com.ecommerce.web.dto.LoginRequest;
+import com.ecommerce.web.dto.RegisterRequest;
+import com.ecommerce.web.dto.UserDto;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.stereotype.Controller;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
-@RequestMapping("/auth")
+@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
-    private final UserService userService;
 
-    public AuthController(UserService userService){
-        this.userService = userService;
+    private final UserService userService;
+    private final AuthService authService;
+
+    @PostMapping("/register")
+    public UserDto register(@RequestBody RegisterRequest request) {
+        return userService.register(request);
     }
 
     @PostMapping("/login")
-    String login(
-            @RequestParam String email,
-            @RequestParam String password,
-            HttpSession session){
-
-        if (userService.validateCredentials(email,password)) {
-            session.setAttribute("user", userService.getByEmail(email));
-            return "redirect:/";
-        }
-
-        session.setAttribute("error", "invalid credentials");
-        return "redirect:/login";
-    }
-
-    @PostMapping("/register")
-    public String register(
-            @RequestParam String email,
-            @RequestParam String name,
-            @RequestParam String password,
-            HttpSession session){
-
-        try {
-            userService.registerUser(email, name, password);
-            session.setAttribute("msg", "registration successfull");
-            return "redirect:/login";
-        } catch (Exception e) {
-            session.setAttribute("error", e.getMessage());
-            return "redirect: register/";
-        }
+    public AuthResponse login(@RequestBody LoginRequest request) {
+        return authService.login(request);
     }
 }

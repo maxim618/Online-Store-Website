@@ -8,4 +8,5 @@ public class OrderItemDto {
     private String productTitle;
     private Integer quantity;
     private Double price;
+    private Double lineTotal;
 }
