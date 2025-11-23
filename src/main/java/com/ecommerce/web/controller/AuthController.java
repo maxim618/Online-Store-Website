@@ -2,12 +2,14 @@ package com.ecommerce.web.controller;
 
 import com.ecommerce.security.CustomUserDetails;
 import com.ecommerce.security.JwtService;
+import com.ecommerce.service.impl.TokenBlacklistService;
 import com.ecommerce.service.interfaces.UserService;
 import com.ecommerce.web.dto.LoginRequest;
 import com.ecommerce.web.dto.RegisterRequest;
 import com.ecommerce.web.dto.TokenResponse;
 import com.ecommerce.web.dto.UpdateProfileRequest;
 import com.ecommerce.web.dto.UserDto;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,6 +25,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final JwtService jwtService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     // ===========================
     // LOGIN
@@ -132,4 +135,20 @@ public class AuthController {
 
         return ResponseEntity.ok("Profile updated");
     }
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body("No token found");
+        }
+
+        String token = authHeader.substring(7);
+
+        tokenBlacklistService.blacklist(token);
+
+        return ResponseEntity.ok("Logged out");
+    }
+
 }
