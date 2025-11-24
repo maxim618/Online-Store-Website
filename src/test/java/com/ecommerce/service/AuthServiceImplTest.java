@@ -129,4 +129,50 @@ class AuthServiceImplTest {
         assertEquals("Email cannot be empty", ex.getMessage());
     }
 
+    @Test
+    void loginGeneratesTokenCorrectly() {
+
+        LoginRequest request = new LoginRequest();
+        request.setEmail("john@mail.com");
+        request.setPassword("12345");
+
+        UserEntity user = new UserEntity();
+        user.setId(10L);
+        user.setEmail("john@mail.com");
+        user.setName("John");
+        user.setRole("ROLE_USER");
+        user.setPassword(encoder.encode("12345"));
+
+        // userService возвращает пользователя
+        when(userService.loadUserByEmail("john@mail.com"))
+                .thenReturn(user);
+
+        // jwtService должен вернуть TOKEN_ABC
+        when(jwtService.generateToken(
+                "john@mail.com",
+                10L,
+                "John",
+                "ROLE_USER"))
+                .thenReturn("TOKEN_ABC");
+
+        // маппер должен вернуть DTO
+        when(userMapper.toDto(user))
+                .thenReturn(new UserDto(10L, "john@mail.com", "John", "ROLE_USER"));
+
+        AuthResponse response = authService.login(request);
+
+        // проверяем именно токен
+        assertNotNull(response.getToken());
+        assertEquals("TOKEN_ABC", response.getToken());
+
+        // проверяем что jwtService вызван правильно
+        verify(jwtService, times(1)).generateToken(
+                "john@mail.com",
+                10L,
+                "John",
+                "ROLE_USER"
+        );
+    }
+
+
 }
