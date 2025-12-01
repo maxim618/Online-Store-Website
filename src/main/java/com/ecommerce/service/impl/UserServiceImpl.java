@@ -20,21 +20,21 @@ public class UserServiceImpl implements UserService {
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Override
-    public UserDto register(RegisterRequest request) {
+    public void register(String email, String name, String rawPassword) {
 
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Email already taken");
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("User with this email already exists");
         }
 
         UserEntity user = UserEntity.builder()
-                .email(request.getEmail())
-                .name(request.getName())
-                .password(encoder.encode(request.getPassword()))
-                .enabled(true)
-                .role("ROLE_USER")
+                .email(email)
+                .name(name)
+                .password(encoder.encode(rawPassword))
+                .role("USER")       // по умолчанию каждый пользователь = USER
+                .enabled(true)      // учётная запись активна
                 .build();
 
-        return mapper.toDto(userRepository.save(user));
+        userRepository.save(user);
     }
 
     @Override
