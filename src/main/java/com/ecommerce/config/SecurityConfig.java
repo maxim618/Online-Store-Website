@@ -1,6 +1,10 @@
 package com.ecommerce.config;
 
+
+
 import com.ecommerce.security.JwtFilter;
+import com.ecommerce.security.UserDetailsServiceImpl;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,8 +14,8 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -23,44 +27,63 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
-    private final UserDetailsService userDetailsService;
+    private final UserDetailsServiceImpl userDetailsServiceImpl;
+    /**  -1-
+     * http.exceptionHandling - реакция Spring Security на ошибки авторизации/аутентификации, например:нет токена ,
+     * токен невалидный, токен истёк , у пользователя нет прав , доступ запрещён  Это «центр управления ошибками
+     * безопасности»
+     *   -2-
+     *  AuthenticationEntryPoint — это обработчик ошибок аутентификации. Он вызывается, когда запрос НЕ прошёл
+     *  аутентификацию. */
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> ex  //-1-
+                        .authenticationEntryPoint(  //-2-
+                                (request, response, authException) ->
+                                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+                        )
+                )
                 .authorizeHttpRequests(auth -> auth
 
-                        // Доступ без токена
+                        // открытые эндпоинты
                         .requestMatchers(
-                                "/auth/**",
-                                "/login",
-                                "/register",
-                                "/error",
+                                "/auth/login",
+                                "/auth/register",
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
-                                "/",
                                 "/products/**",
-                                "/categories/**"
+                                "/categories/**",
+                                "/auth/logout",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
                         ).permitAll()
 
-                        // Все остальные — под JWT
+                        // только ADMIN
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+
+                        // всё остальное — пользователь
                         .anyRequest().authenticated()
+
                 )
+
+
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
+        provider.setUserDetailsService(userDetailsServiceImpl);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
