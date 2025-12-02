@@ -23,6 +23,14 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse login(LoginRequest request) {
 
+        if (request.getEmail() == null || request.getEmail().isBlank()) {
+            throw new IllegalArgumentException("Email cannot be empty");
+        }
+
+        if (!request.getEmail().contains("@")) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+
         UserEntity user = userService.loadUserByEmail(request.getEmail());
 
         if (!encoder.matches(request.getPassword(), user.getPassword())) {
