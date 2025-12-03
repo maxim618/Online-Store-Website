@@ -3,6 +3,7 @@ package com.ecommerce.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,10 +16,9 @@ import java.util.Map;
 public class JwtService {
 
     // Ключ должен быть минимум 32 символа!
-    @Value("${jwt.secret:SUPER_SECRET_KEY_12345678901234567890}")
+    @Value("${jwt.secret}")
     private String SECRET;
-
-    private final long EXPIRE = 86400000; // 24 hours
+    private final long EXPIRE = 86400000L;  // 24 hours
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
@@ -28,6 +28,10 @@ public class JwtService {
     //           GENERATE JWT
     // =================================
     public String generateToken(String email, Long id, String name, String role) {
+
+        if (email == null || id == null || name == null || role == null) {
+            throw new IllegalArgumentException("JWT fields must not be null");
+        }
 
         return Jwts.builder()
                 .subject(email)
