@@ -112,7 +112,7 @@ class CartIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
 
-        // 2) READ: проверяем count = 1 (одна запись в корзине, но quantity=2)
+        // 2) READ: проверяем count = 1 (одна запись в корзине, но при этом quantity=2)
         mockMvc.perform(get("/api/cart/count")
                         .param("userId", userId.toString())
                         .header("Authorization", "Bearer " + token))
@@ -143,6 +143,14 @@ class CartIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(content().string("1"));
+
+        //4.1) проверяем, что quntity = 5
+        mockMvc.perform(get("/api/cart")
+                        .param("userId", userId.toString())
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].quantity").value(5));
+
 
         // 5) DELETE (remove): удаляем товар
         mockMvc.perform(delete("/api/cart/remove")
