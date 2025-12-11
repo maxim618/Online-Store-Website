@@ -30,9 +30,6 @@ class AuthMeIntegrationTest {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    @Autowired
-    JwtService jwtService;
-
     ObjectMapper mapper = new ObjectMapper();
 
     @BeforeEach
@@ -49,9 +46,7 @@ class AuthMeIntegrationTest {
         userRepository.save(user);
     }
 
-    // -----------------------------
     // 1) /auth/me must return user with valid token
-    // -----------------------------
     @Test
     void authMeShouldReturnUserWithValidToken() throws Exception {
 
@@ -83,9 +78,7 @@ class AuthMeIntegrationTest {
                 .andExpect(jsonPath("$.role").value("ROLE_USER"));
     }
 
-    // -----------------------------
     // 2) Invalid token -> 401
-    // -----------------------------
     @Test
     void authMeShouldReturn401WithInvalidToken() throws Exception {
         mockMvc.perform(get("/auth/me")
@@ -93,9 +86,7 @@ class AuthMeIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // -----------------------------
     // 3) No token -> 401
-    // -----------------------------
     @Test
     void authMeShouldReturn401WhenNoToken() throws Exception {
         mockMvc.perform(get("/auth/me"))
