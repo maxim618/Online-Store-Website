@@ -32,7 +32,6 @@ class AuthServiceImplTest {
         userMapper = mock(UserMapper.class);
         encoder = new BCryptPasswordEncoder();
 
-
         authService = new AuthServiceImpl(userService,
                 userMapper,
                 jwtService);
@@ -68,7 +67,6 @@ class AuthServiceImplTest {
         assertEquals(1L, response.getUser().getId());
     }
 
-
     @Test
     void loginWrongPassword() {
         LoginRequest request = new LoginRequest();
@@ -86,6 +84,7 @@ class AuthServiceImplTest {
 
         assertThrows(IllegalArgumentException.class, () -> authService.login(request));
     }
+
     @Test
     void loginUserNotFoundThrowsException() {
 
@@ -174,6 +173,4 @@ class AuthServiceImplTest {
                 "ROLE_USER"
         );
     }
-
-
 }
