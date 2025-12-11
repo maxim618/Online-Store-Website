@@ -1,0 +1,127 @@
+package com.ecommerce.security;
+
+import com.ecommerce.persistence.model.UserEntity;
+import com.ecommerce.persistence.repository.UserRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+// чтобы контекст очищался между тестами
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+class SecurityIntegrationTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @BeforeEach
+    void setUp() {
+        userRepository.deleteAll();
+
+        // создаём обычного пользователя
+        createUser("user@mail.com", "ROLE_USER", "123");
+
+        // создаём администратора
+        createUser("admin@mail.com", "ROLE_ADMIN", "123");
+    }
+
+    private void createUser(String email, String role, String rawPassword) {
+        UserEntity user = UserEntity.builder()
+                .email(email)
+                .name("Test User")
+                .password(passwordEncoder.encode(rawPassword))
+                .role(role)
+                .enabled(true)
+                .build();
+
+        userRepository.save(user);
+    }
+
+    private String loginAndGetToken(String email, String password) throws Exception {
+        String body = """
+                {
+                  "email": "%s",
+                  "password": "%s"
+                }
+                """.formatted(email, password);
+
+        String json = mockMvc.perform(post("/auth/login")
+                        .contentType(APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        JsonNode node = objectMapper.readTree(json);
+        return node.get("token").asText();
+    }
+
+    // 1) публичный эндпоинт без токена
+    @Test
+    void publicEndpointShouldBeAccessibleWithoutToken() throws Exception {
+        mockMvc.perform(get("/api/categories"))
+                .andExpect(status().isOk());
+    }
+
+    // 2) защищённый эндпоинт без токена → 401
+    @Test
+    void adminEndpointWithoutTokenShouldReturn401() throws Exception {
+        mockMvc.perform(get("/admin/status"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    // 3) user-токен не должен пускать в /admin/status → 403
+    @Test
+    void userTokenShouldNotAccessAdminEndpoint() throws Exception {
+        String token = loginAndGetToken("user@mail.com", "123");
+
+        mockMvc.perform(get("/admin/status")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isForbidden());
+    }
+
+    // 4) admin-токен должен пускать в /admin/status → 200
+    @Test
+    void adminTokenShouldAccessAdminEndpoint() throws Exception {
+        String token = loginAndGetToken("admin@mail.com", "123");
+
+        mockMvc.perform(get("/admin/status")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+    }
+
+    // 5) user-токен должен иметь доступ к любому authenticated эндпоинту
+    // (пример: /api/cart, если он не в permitAll)
+    @Test
+    void userTokenShouldAccessAuthenticatedEndpoint() throws Exception {
+        String token = loginAndGetToken("user@mail.com", "123");
+
+        mockMvc.perform(get("/api/cart")
+                        .param("userId", "1")
+                        .header("Authorization", "Bearer " + token))
+                // тут важно, что уже не 401/403, а либо 200,
+                // либо другая бизнес-ошибка, если что-то не так в сервисе
+                .andExpect(status().isOk());
+    }
+}
