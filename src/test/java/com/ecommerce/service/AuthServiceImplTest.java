@@ -165,7 +165,7 @@ class AuthServiceImplTest {
         assertNotNull(response.getToken());
         assertEquals("TOKEN_ABC", response.getToken());
 
-        // проверяем что jwtService вызван правильно
+        // проверяем что jwtService вызывается правильно
         verify(jwtService, times(1)).generateToken(
                 "john@mail.com",
                 10L,
