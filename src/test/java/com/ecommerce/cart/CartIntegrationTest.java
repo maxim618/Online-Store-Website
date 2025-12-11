@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
@@ -90,8 +89,7 @@ class CartIntegrationTest {
                 .getContentAsString();
 
         JsonNode node = objectMapper.readTree(json);
-//        String actual = node.asText();
-//        System.out.println(actual);
+
         return node.get("token").asText();
     }
 
@@ -106,7 +104,6 @@ class CartIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("0"));
 
-//        String actual = response.getHeaders().get(HttpHeaders.LOCATION).get(0);
 
         // 1) CREATE: добавляем товар в корзину (quantity=2)
         // Примечание: getCartItemCount возвращает количество разных товаров (записей), а не общее количество
@@ -157,7 +154,7 @@ class CartIntegrationTest {
                 .andExpect(jsonPath("$.items[0].quantity").value(5));
 
 
-        // 5) DELETE (remove): удаляем товар
+        // 5) DELETE : удаляем товар
         mockMvc.perform(delete("/api/cart/remove")
                         .param("userId", userId.toString())
                         .param("productId", productId.toString())
@@ -171,7 +168,7 @@ class CartIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("0"));
 
-        // 7) ADD снова + CLEAR
+        // 7) ADD снова + очистка
         mockMvc.perform(post("/api/cart/add")
                         .param("userId", userId.toString())
                         .param("productId", productId.toString())
