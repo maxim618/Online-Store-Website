@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
@@ -89,6 +90,8 @@ class CartIntegrationTest {
                 .getContentAsString();
 
         JsonNode node = objectMapper.readTree(json);
+//        String actual = node.asText();
+//        System.out.println(actual);
         return node.get("token").asText();
     }
 
@@ -102,6 +105,8 @@ class CartIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(content().string("0"));
+
+//        String actual = response.getHeaders().get(HttpHeaders.LOCATION).get(0);
 
         // 1) CREATE: добавляем товар в корзину (quantity=2)
         // Примечание: getCartItemCount возвращает количество разных товаров (записей), а не общее количество
