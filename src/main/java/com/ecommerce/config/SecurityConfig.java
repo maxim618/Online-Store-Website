@@ -1,7 +1,5 @@
 package com.ecommerce.config;
 
-
-
 import com.ecommerce.security.JwtFilter;
 import com.ecommerce.security.UserDetailsServiceImpl;
 import jakarta.servlet.http.HttpServletResponse;
@@ -59,6 +57,7 @@ public class SecurityConfig {
                                 "/images/**",
                                 "/products/**",
                                 "/categories/**",
+                                "api/categories/**",
                                 "/auth/logout",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
@@ -72,7 +71,6 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
 
                 )
-
 
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
