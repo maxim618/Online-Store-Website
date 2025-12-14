@@ -9,5 +9,10 @@ public interface UserService {
 
     UserEntity loadUserByEmail(String email); // нужно для Security
 
+    void updateProfile(String email, String name, String newPassword);
+
+
+    UserDto getByEmail(String email);
+
     UserDto getById(Long id);
 }
