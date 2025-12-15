@@ -2,6 +2,7 @@ package com.ecommerce.security;
 
 import com.ecommerce.persistence.model.UserEntity;
 import com.ecommerce.persistence.repository.UserRepository;
+import com.ecommerce.testutil.DbCleaner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,11 +31,15 @@ class AuthMeIntegrationTest {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    @Autowired
+    DbCleaner dbCleaner;
+
     ObjectMapper mapper = new ObjectMapper();
 
     @BeforeEach
     void setup() {
-        userRepository.deleteAll();
+        dbCleaner.clean();
+//        userRepository.deleteAll();
 
         UserEntity user = new UserEntity();
         user.setEmail("john@mail.com");
