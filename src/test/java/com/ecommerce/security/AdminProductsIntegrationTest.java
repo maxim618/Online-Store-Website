@@ -2,6 +2,7 @@ package com.ecommerce.security;
 
 import com.ecommerce.persistence.model.UserEntity;
 import com.ecommerce.persistence.repository.UserRepository;
+import com.ecommerce.testutil.DbCleaner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,11 +33,14 @@ class AdminProductsIntegrationTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired private DbCleaner dbCleaner;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
-        userRepository.deleteAll();
+        dbCleaner.clean();
+//        userRepository.deleteAll();
 
         // обычный пользователь
         UserEntity user = new UserEntity();
