@@ -31,7 +31,6 @@ class AuthMeIntegrationTest {
 
     @BeforeEach
     void setup() {
-
         dbCleaner.clean();
 
         UserEntity user = new UserEntity();
