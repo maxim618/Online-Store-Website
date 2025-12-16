@@ -10,7 +10,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -18,23 +17,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class JwtFilterIntegrationTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
+    @MockBean private JwtService jwtService;
+    @MockBean private TokenBlacklistService blacklistService;
 
-    @MockBean
-    private JwtService jwtService;
-
-    @MockBean
-    private TokenBlacklistService blacklistService;
-
-    /** 1. БЕЗ ТОКЕНА → 401*/
+    // 1. БЕЗ ТОКЕНА → 401
     @Test
     void requestWithoutTokenShouldReturn401() throws Exception {
         mockMvc.perform(get("/test/secure"))
                 .andExpect(status().isUnauthorized());
     }
 
-    /** 2. ТОКЕН ЕСТЬ, НО НЕДЕЙСТВИТЕЛЬНЫЙ → 401*/
+    // 2. ТОКЕН ЕСТЬ, НО НЕДЕЙСТВИТЕЛЬНЫЙ → 401
     @Test
     void invalidTokenShouldReturn401() throws Exception {
 
@@ -45,7 +39,7 @@ public class JwtFilterIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    /** 3. ТОКЕН В BLACKLIST → 401*/
+    // 3. ТОКЕН В BLACKLIST → 401
     @Test
     void blacklistedTokenShouldReturn401() throws Exception {
 
@@ -57,7 +51,7 @@ public class JwtFilterIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    /** 4. ВАЛИДНЫЙ ТОКЕН → 200 ОК*/
+    // 4. ВАЛИДНЫЙ ТОКЕН → 200 ОК
     @Test
     void validTokenShouldPassFilter() throws Exception {
 
