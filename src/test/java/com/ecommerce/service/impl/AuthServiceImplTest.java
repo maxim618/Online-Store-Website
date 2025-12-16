@@ -1,20 +1,24 @@
-package com.ecommerce.service;
+package com.ecommerce.service.impl;
 
 import com.ecommerce.service.interfaces.UserService;
 import com.ecommerce.web.dto.AuthResponse;
 import com.ecommerce.web.dto.LoginRequest;
 import com.ecommerce.web.dto.UserDto;
+import com.ecommerce.web.mapper.UserMapper;
 import com.ecommerce.persistence.model.UserEntity;
 import com.ecommerce.security.JwtService;
-import com.ecommerce.service.impl.AuthServiceImpl;
-import com.ecommerce.web.mapper.UserMapper;
-import org.junit.jupiter.api.BeforeEach;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 class AuthServiceImplTest {
 
@@ -87,7 +91,6 @@ class AuthServiceImplTest {
 
     @Test
     void loginUserNotFoundThrowsException() {
-
         LoginRequest request = new LoginRequest();
         request.setEmail("wrong@mail.com");
         request.setPassword("123");
@@ -101,7 +104,6 @@ class AuthServiceImplTest {
 
     @Test
     void loginWithNullEmail() {
-
         LoginRequest request = new LoginRequest();
         request.setEmail(null);
         request.setPassword("123");
@@ -116,7 +118,6 @@ class AuthServiceImplTest {
 
     @Test
     void loginWithEmptyEmail() {
-
         LoginRequest request = new LoginRequest();
         request.setEmail(" "); // пустой email
         request.setPassword("123");
@@ -131,7 +132,6 @@ class AuthServiceImplTest {
 
     @Test
     void loginGeneratesTokenCorrectly() {
-
         LoginRequest request = new LoginRequest();
         request.setEmail("john@mail.com");
         request.setPassword("12345");
