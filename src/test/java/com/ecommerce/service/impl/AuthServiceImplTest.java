@@ -43,7 +43,6 @@ class AuthServiceImplTest {
 
     @Test
     void loginSuccess() {
-
         LoginRequest request = new LoginRequest();
         request.setEmail("test@mail.com");
         request.setPassword("123");
