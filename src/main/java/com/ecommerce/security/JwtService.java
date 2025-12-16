@@ -3,7 +3,6 @@ package com.ecommerce.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -24,9 +23,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
     }
 
-    // =================================
     //           GENERATE JWT
-    // =================================
     public String generateToken(String email, Long id, String name, String role) {
 
         if (email == null || id == null || name == null || role == null) {
@@ -49,9 +46,7 @@ public class JwtService {
                 .compact();
     }
 
-    // =================================
     //       EXTRACT DATA FROM JWT
-    // =================================
 
     public String extractEmail(String token) {
         return extractAllClaims(token).getSubject();
@@ -69,9 +64,7 @@ public class JwtService {
         return extractAllClaims(token).get("role", String.class);
     }
 
-    // =================================
     //          TOKEN VALIDATION
-    // =================================
     public boolean isTokenValid(String token) {
         try {
             Claims claims = extractAllClaims(token);
@@ -81,9 +74,7 @@ public class JwtService {
         }
     }
 
-    // =================================
     //         PARSE JWT
-    // =================================
     private Claims extractAllClaims(String token) {
         return Jwts
                 .parser()
