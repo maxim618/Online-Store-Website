@@ -2,9 +2,9 @@ package com.ecommerce.cart;
 
 import com.ecommerce.persistence.model.Product;
 import com.ecommerce.persistence.model.UserEntity;
-import com.ecommerce.persistence.repository.CartItemRepository;
 import com.ecommerce.persistence.repository.ProductRepository;
 import com.ecommerce.persistence.repository.UserRepository;
+import com.ecommerce.testutil.DbCleaner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,28 +17,24 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class CartIntegrationTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private ProductRepository productRepository;
-
-    @Autowired
-    private CartItemRepository cartItemRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    @Autowired private MockMvc mockMvc;
+    @Autowired private UserRepository userRepository;
+    @Autowired private ProductRepository productRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired DbCleaner dbCleaner;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -47,12 +43,7 @@ class CartIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        // сначала дочерние записи (cart_items)
-        cartItemRepository.deleteAll();
-        // потом продукты
-        productRepository.deleteAll();
-        // потом пользователи
-        userRepository.deleteAll();
+        dbCleaner.clean();
 
         // 1. Пользователь
         UserEntity user = new UserEntity();
@@ -144,7 +135,7 @@ class CartIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("1"));
 
-        //4.1) проверяем, что quntity = 5
+        //4.1) проверяем, что quantity = 5
         mockMvc.perform(get("/api/cart")
                         .param("userId", userId.toString())
                         .header("Authorization", "Bearer " + token))
