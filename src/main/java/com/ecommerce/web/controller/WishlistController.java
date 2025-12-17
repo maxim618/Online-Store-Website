@@ -34,4 +34,12 @@ public class WishlistController {
     public List<WishlistItemDto> get(@RequestParam Long userId) {
         return wishlistService.getWishlist(userId);
     }
+
+    @GetMapping("/exists")
+    public boolean exists(
+            @RequestParam Long userId,
+            @RequestParam Long productId
+    ) {
+        return wishlistService.existsInWishlist(userId, productId);
+    }
 }

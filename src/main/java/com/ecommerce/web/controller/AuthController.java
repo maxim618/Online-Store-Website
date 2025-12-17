@@ -16,7 +16,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/auth")
@@ -28,9 +33,7 @@ public class AuthController {
     private final JwtService jwtService;
     private final TokenBlacklistService tokenBlacklistService;
 
-    // ===========================
     // LOGIN
-    // ===========================
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest request) {
 
@@ -50,7 +53,6 @@ public class AuthController {
                 user.getRole()
         );
 
-
         return ResponseEntity.ok(
                 new TokenResponse(
                         token,
@@ -63,9 +65,7 @@ public class AuthController {
         );
     }
 
-    // ===========================
     // REGISTER
-    // ===========================
     @PostMapping("/register")
     public ResponseEntity<TokenResponse> register(@RequestBody RegisterRequest request) {
 
@@ -95,9 +95,7 @@ public class AuthController {
         );
     }
 
-    // ===========================
     // ME (PROFILE)
-    // ===========================
     @GetMapping("/me")
     public ResponseEntity<UserDto> me(Authentication authentication) {
 
@@ -117,9 +115,7 @@ public class AuthController {
         return ResponseEntity.ok(dto);
     }
 
-    // ===========================
     // UPDATE PROFILE
-    // ===========================
     @PutMapping("/me")
     public ResponseEntity<String> updateProfile(
             Authentication authentication,
@@ -151,5 +147,4 @@ public class AuthController {
 
         return ResponseEntity.ok("Logged out");
     }
-
 }
