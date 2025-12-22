@@ -2,6 +2,7 @@ package com.ecommerce.security;
 
 import com.ecommerce.persistence.model.UserEntity;
 import com.ecommerce.persistence.repository.UserRepository;
+import com.ecommerce.testutil.DbCleaner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,29 +15,26 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 
 @SpringBootTest
 @AutoConfigureMockMvc
-// чтобы контекст очищался между тестами
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)  // чтобы контекст очищался между тестами
 class SecurityIntegrationTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
+    @Autowired private MockMvc mockMvc;
+    @Autowired private UserRepository userRepository;
+    @Autowired private DbCleaner dbCleaner;
+    @Autowired private PasswordEncoder passwordEncoder;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
-        userRepository.deleteAll();
+
+        dbCleaner.clean();
 
         // создаём обычного пользователя
         createUser("user@mail.com", "ROLE_USER", "123");
@@ -79,9 +77,9 @@ class SecurityIntegrationTest {
 
     // 1) публичный эндпоинт без токена
     @Test
-    void publicEndpointShouldBeAccessibleWithoutToken() throws Exception {
+    void publicEndpointShouldNotBeAccessibleWithoutToken() throws Exception {
         mockMvc.perform(get("/api/categories"))
-                .andExpect(status().isOk());
+                .andExpect(status().isUnauthorized());
     }
 
     // 2) защищённый эндпоинт без токена → 401

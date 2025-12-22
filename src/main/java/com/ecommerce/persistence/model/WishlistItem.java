@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "wishlist")
+@Table(name = "wishlist",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "product_id"}) //уникальный индекс - защита от дублей на уровне БД
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

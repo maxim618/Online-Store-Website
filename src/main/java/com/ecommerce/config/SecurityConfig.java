@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -43,33 +44,35 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex  //-1-
                         .authenticationEntryPoint(  //-2-
                                 (request, response, authException) ->
-                                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
-                        )
+                                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"))
+                        .accessDeniedHandler((request, response, accessDeniedException) ->
+                                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden"))
                 )
                 .authorizeHttpRequests(auth -> auth
 
-                        // открытые эндпоинты
+                        // Открытые эндпоинты
                         .requestMatchers(
                                 "/auth/login",
                                 "/auth/register",
-                                "/css/**",
-                                "/js/**",
-                                "/images/**",
-                                "/products/**",
-                                "/categories/**",
-                                "api/categories/**",
                                 "/auth/logout",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**"
                         ).permitAll()
 
-                        // только ADMIN
+                        // Управление товарами — только ADMIN
+                        .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
+
+                        // Admin endpoints
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                        // всё остальное — пользователь
+                        // USER - корзина/вишлист/заказы/профиль и т.д.
                         .anyRequest().authenticated()
-
                 )
 
                 .authenticationProvider(authenticationProvider())

@@ -1,11 +1,10 @@
-package com.ecommerce.service;
+package com.ecommerce.service.impl;
 
 import com.ecommerce.exception.EntityNotFoundException;
 import com.ecommerce.persistence.model.Product;
 import com.ecommerce.persistence.model.WishlistItem;
 import com.ecommerce.persistence.repository.ProductRepository;
 import com.ecommerce.persistence.repository.WishlistRepository;
-import com.ecommerce.service.impl.WishlistServiceImpl;
 import com.ecommerce.web.dto.WishlistItemDto;
 import com.ecommerce.web.mapper.WishlistMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +44,7 @@ public class WishlistServiceImplTest {
             Long userId = 1L;
             Long productId = 10L;
 
-            // в вишлисте ещё нет такого товара
+            // в wishlist ещё нет такого товара
             when(wishlistRepository.existsByUserIdAndProduct_Id(userId, productId))
                     .thenReturn(false);
 
@@ -107,7 +106,8 @@ public class WishlistServiceImplTest {
         }
 
         @Test
-        void getWishlist_shouldReturnMappedDtos() {
+        void getWishlist_shouldReturnMappedDto() {
+
             Long userId = 1L;
 
             WishlistItem item1 = new WishlistItem();

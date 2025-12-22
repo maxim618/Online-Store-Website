@@ -4,7 +4,6 @@ import com.ecommerce.exception.EntityNotFoundException;
 import com.ecommerce.persistence.model.UserEntity;
 import com.ecommerce.persistence.repository.UserRepository;
 import com.ecommerce.service.interfaces.UserService;
-import com.ecommerce.web.dto.RegisterRequest;
 import com.ecommerce.web.dto.UserDto;
 import com.ecommerce.web.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +41,39 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User not found: " + email));
     }
+
+    @Override
+    public void updateProfile(String email, String name, String newPassword) {
+
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (name != null && !name.isBlank()) {
+            user.setName(name);
+        }
+
+        if (newPassword != null && !newPassword.isBlank()) {
+            user.setPassword(encoder.encode(newPassword));
+        }
+
+        userRepository.save(user);
+    }
+
+
+    @Override
+    public UserDto getByEmail(String email) {
+
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return new UserDto(
+                user.getId(),
+                user.getEmail(),
+                user.getName(),
+                user.getRole()
+        );
+    }
+
 
     @Override
     public UserDto getById(Long id) {

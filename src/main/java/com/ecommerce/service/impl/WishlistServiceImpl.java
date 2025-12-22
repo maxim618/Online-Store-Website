@@ -47,6 +47,11 @@ public class WishlistServiceImpl implements WishlistService {
     }
 
     @Override
+    public boolean existsInWishlist(Long userId, Long productId) {
+        return wishlistRepository.existsByUserIdAndProduct_Id(userId, productId);
+    }
+
+    @Override
     public List<WishlistItemDto> getWishlist(Long userId) {
         return wishlistRepository.findByUserId(userId)
                 .stream()
