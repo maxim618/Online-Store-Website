@@ -27,14 +27,13 @@ public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
     private final UserDetailsServiceImpl userDetailsServiceImpl;
-    /**  -1-
-     * http.exceptionHandling - реакция Spring Security на ошибки авторизации/аутентификации, например:нет токена ,
-     * токен невалидный, токен истёк , у пользователя нет прав , доступ запрещён  Это «центр управления ошибками
-     * безопасности»
-     *   -2-
-     *  AuthenticationEntryPoint — это обработчик ошибок аутентификации. Он вызывается, когда запрос НЕ прошёл
-     *  аутентификацию. */
-
+    //  -1-
+    // http.exceptionHandling - реакция Spring Security на ошибки авторизации/аутентификации, например:нет токена ,
+    // токен невалидный, токен истёк , у пользователя нет прав , доступ запрещён  Это «центр управления ошибками
+    // безопасности»
+    //   -2-
+    //  AuthenticationEntryPoint — это обработчик ошибок аутентификации. Он вызывается, когда запрос НЕ прошёл
+    //  аутентификацию.
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
