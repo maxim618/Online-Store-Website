@@ -4,11 +4,11 @@ import com.ecommerce.security.CustomUserDetails;
 import com.ecommerce.security.JwtService;
 import com.ecommerce.service.impl.TokenBlacklistService;
 import com.ecommerce.service.interfaces.UserService;
+import com.ecommerce.web.dto.AuthResponse;
 import com.ecommerce.web.dto.LoginRequest;
 import com.ecommerce.web.dto.RegisterRequest;
-import com.ecommerce.web.dto.TokenResponse;
-import com.ecommerce.web.dto.UpdateProfileRequest;
 import com.ecommerce.web.dto.UserDto;
+import com.ecommerce.web.dto.UpdateProfileRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +18,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 
@@ -33,14 +33,16 @@ public class AuthController {
     private final JwtService jwtService;
     private final TokenBlacklistService tokenBlacklistService;
 
+
+
     // LOGIN
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
 
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
+                        loginRequest.getEmail(),
+                        loginRequest.getPassword()
                 )
         );
 
@@ -53,46 +55,56 @@ public class AuthController {
                 user.getRole()
         );
 
-        return ResponseEntity.ok(
-                new TokenResponse(
-                        token,
-                        user.getId(),
-                        user.getEmail(),
-                        user.getName(),
-                        user.getRole(),
-                        86400000
-                )
-        );
+        AuthResponse resp = new AuthResponse();
+        resp.setToken(token);
+        resp.setUser(new UserDto(
+                user.getId(),
+                user.getEmail(),
+                user.getName(),
+                user.getRole()
+        ));
+
+        return ResponseEntity.ok(resp);
     }
 
-    // REGISTER
+    // REGISTER (автоматически логиним после регистрации)
     @PostMapping("/register")
-    public ResponseEntity<TokenResponse> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest registerRequest) {
 
         userService.register(
-                request.getEmail(),
-                request.getName(),
-                request.getPassword()
+                registerRequest.getEmail(),
+                registerRequest.getName(),
+                registerRequest.getPassword()
         );
 
-        // После регистрации логиним автоматически
-        String token = jwtService.generateToken(
-                request.getEmail(),
-                null,
-                request.getName(),
-                "USER"
-        );
-
-        return ResponseEntity.ok(
-                new TokenResponse(
-                        token,
-                        null,
-                        request.getEmail(),
-                        request.getName(),
-                        "USER",
-                        86400000
+        // Важно: после register делаем реальную аутентификацию,
+        // чтобы получить корректные id/role (без null)
+        Authentication auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        registerRequest.getEmail(),
+                        registerRequest.getPassword()
                 )
         );
+
+        CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+
+        String token = jwtService.generateToken(
+                user.getEmail(),
+                user.getId(),
+                user.getName(),
+                user.getRole()
+        );
+
+        AuthResponse resp = new AuthResponse();
+        resp.setToken(token);
+        resp.setUser(new UserDto(
+                user.getId(),
+                user.getEmail(),
+                user.getName(),
+                user.getRole()
+        ));
+
+        return ResponseEntity.ok(resp);
     }
 
     // ME (PROFILE)
@@ -132,6 +144,7 @@ public class AuthController {
 
         return ResponseEntity.ok("Profile updated");
     }
+
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request) {
 
