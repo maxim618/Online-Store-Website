@@ -10,5 +10,7 @@ public interface WishlistService {
 
     void removeFromWishlist(Long userId, Long productId);
 
+    boolean existsInWishlist(Long userId, Long productId);
+
     List<WishlistItemDto> getWishlist(Long userId);
 }
