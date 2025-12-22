@@ -18,22 +18,26 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @WebMvcTest(ProductController.class)
 @AutoConfigureMockMvc(addFilters = false) // контроллер-тест без security
 @Import(GlobalExceptionHandler.class)     // чтобы 404/400 шли через handler
 class ProductControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
+    @Autowired private ObjectMapper objectMapper; // используем Spring-настроенный ObjectMapper
 
-    @Autowired
-    private ObjectMapper objectMapper; // используем Spring-настроенный ObjectMapper
-
-    @org.springframework.boot.test.mock.mockito.MockBean
+    @MockBean
     private ProductService productService;
 
     // чтобы WebMvcTest не падал из-за Security компонентов:
