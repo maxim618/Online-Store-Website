@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserService {
                 .email(email)
                 .name(name)
                 .password(encoder.encode(rawPassword))
-                .role("USER")       // по умолчанию каждый пользователь = USER
+                .role("ROLE_USER")       // по умолчанию каждый пользователь = USER 
                 .enabled(true)      // учётная запись активна
                 .build();
 
