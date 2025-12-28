@@ -1,3 +1,5 @@
+![CI](https://github.com/maxim618/Online-Store-Website/actions/workflows/ci.yml/badge.svg)
+
 # Online Store Backend (Spring Boot)
 
 Production-ready backend for an e-commerce application with **JWT authentication**,  
