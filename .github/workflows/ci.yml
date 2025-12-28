@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:9.0
+        env:
+          MYSQL_DATABASE: ecommerce
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=30
+
+    env:
+      # Эти переменные совпадают с твоими настройками БД и могут
+      # использоваться, если ты перейдешь на ${DB_HOST:...} в application.properties
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_NAME: ecommerce
+      DB_USER: root
+      DB_PASSWORD: root
+      JWT_SECRET: SUPER_SECRET_KEY_12345678901234567890
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      # На всякий случай подождём MySQL (healthcheck обычно хватает, но это надёжнее)
+      - name: Wait for MySQL
+        run: |
+          for i in {1..60}; do
+            if mysqladmin ping -h 127.0.0.1 -proot --silent; then
+              echo "MySQL is up"
+              break
+            fi
+            sleep 2
+          done
+
+      - name: Run tests
+        run: mvn -q -DskipTests=false test
