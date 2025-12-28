@@ -45,16 +45,16 @@ and realistic testing strategies used in real-world Spring Boot applications.
 
 ### Authorization
 
-| Endpoint | Access |
-|--------|--------|
-| `GET /api/products` | Public |
-| `POST /api/products` | ADMIN |
-| `PUT /api/products/{id}` | ADMIN |
-| `DELETE /api/products/{id}` | ADMIN |
-| `/api/cart/**` | Authenticated USER |
-| `/api/wishlist/**` | Authenticated USER |
-| `/api/orders/**` | Authenticated USER |
-| Reading чужих заказов | ❌ Forbidden |
+| Endpoint                    | Access             |
+|-----------------------------|--------------------|
+| `GET /api/products`         | Public             |
+| `POST /api/products`        | ADMIN              |
+| `PUT /api/products/{id}`    | ADMIN              |
+| `DELETE /api/products/{id}` | ADMIN              |
+| `/api/cart/**`              | Authenticated USER |
+| `/api/wishlist/**`          | Authenticated USER |
+| `/api/orders/**`            | Authenticated USER |
+| Reading чужих заказов       | ❌ Forbidden        |
 
 > **Important:**  
 > User identity is never taken from request parameters.  
