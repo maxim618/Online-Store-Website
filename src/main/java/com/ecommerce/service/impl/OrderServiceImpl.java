@@ -99,4 +99,16 @@ public class OrderServiceImpl implements OrderService {
         }
         return getOrder(orderId);
     }
+
+    @Override
+    public OrderDto getOneForUser(Long orderId, Long userId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+
+        if (!order.getUser().getId().equals(userId)) {
+            throw new org.springframework.security.access.AccessDeniedException("Forbidden");
+        }
+
+        return orderMapper.toDto(order);
+    }
 }
