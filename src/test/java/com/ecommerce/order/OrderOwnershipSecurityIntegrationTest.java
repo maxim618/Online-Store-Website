@@ -150,4 +150,12 @@ class OrderOwnershipSecurityIntegrationTest {
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].id").value((int) user1OrderId));
     }
+
+    @Test
+    void adminEndpoint_userRoleShouldBeForbidden() throws Exception {
+        mockMvc.perform(get("/api/admin/orders")
+                        .param("userId", user1Id.toString())
+                        .header("Authorization", "Bearer " + user1Token))
+                .andExpect(status().isForbidden());
+    }
 }
