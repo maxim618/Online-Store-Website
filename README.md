@@ -38,6 +38,12 @@ and realistic testing strategies used in real-world Spring Boot applications.
 
 ## 🔐 Security Model
 
+### Security
+- User identity is derived exclusively from JWT
+- Client cannot supply userId for user-level endpoints
+- Protection against IDOR vulnerabilities
+- Separate admin endpoints secured via roles
+
 ### Authentication
 - JWT-based authentication
 - Token validation via custom `JwtFilter`
