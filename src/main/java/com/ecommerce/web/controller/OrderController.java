@@ -4,7 +4,6 @@ import com.ecommerce.security.CustomUserDetails;
 import com.ecommerce.service.interfaces.OrderService;
 import com.ecommerce.web.dto.OrderDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 
@@ -51,24 +48,6 @@ public class OrderController {
     public OrderDto getOne(
             @AuthenticationPrincipal CustomUserDetails me,
             @PathVariable Long orderId) {
-//        CustomUserDetails user = authUser();
         return service.getOneForUser(orderId, me.getId());
-//        return service.getOrderForUser(orderId, user.getId(), isAdmin());
     }
-
-//    private CustomUserDetails authUser() {
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        return (CustomUserDetails) auth.getPrincipal();
-//    }
-
-//    private boolean isAdmin() {
-//        return authUser().getAuthorities().stream()
-//                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-//    }
-//    @PreAuthorize("hasRole('ADMIN')")
-//    @GetMapping("/admin")
-//    public List<OrderDto> getOrdersForUser(@RequestParam Long userId) {
-//        return service.getUserOrders(userId);
-//    }
-
 }
