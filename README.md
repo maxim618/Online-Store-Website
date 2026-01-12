@@ -1,158 +1,50 @@
 ![CI](https://github.com/maxim618/Online-Store-Website/actions/workflows/ci.yml/badge.svg)
 
-# Online Store Backend (Spring Boot)
+# Online - Store - Website
 
-Production-ready backend for an e-commerce application with **JWT authentication**,  
-**role-based authorization**, **ownership-safe access control (IDOR protection)**  
-and a **full integration test suite**.
+Backend - приложение интернет-магазина, реализованное на Java и Spring Boot.
 
-This project demonstrates a clean backend architecture, secure API design,
-and realistic testing strategies used in real-world Spring Boot applications.
-
----
-
-## ✨ Key Features
-
-- JWT authentication (stateless)
-- Role-based authorization (USER / ADMIN)
-- Secure product catalog management (ADMIN-only CRUD)
-- Shopping cart & wishlist functionality
-- Order placement with transactional integrity
-- **Ownership-based access control (IDOR-safe)**
-- Global exception handling
-- **Comprehensive integration tests**
-- FK-aware database cleanup for deterministic tests
+Проект создан как портфолио backend-разработчика и демонстрирует
+практический опыт построения серверного приложения с фокусом на
+архитектуру, безопасность и тестируемость.
 
 ---
 
-## 🧱 Architecture Overview
-
-- Layered architecture:
-- Stateless security with JWT
-- User identity is derived **only from SecurityContext**
-- Request parameters are never trusted for authorization
-- Business invariants enforced at service layer
-- Database integrity via foreign keys & unique constraints
-
----
-
-## 🔐 Security Model
-
-### Security
-- User identity is derived exclusively from JWT
-- Client cannot supply userId for user-level endpoints
-- Protection against IDOR vulnerabilities
-- Separate admin endpoints secured via roles
-
-### Authentication
-- JWT-based authentication
-- Token validation via custom `JwtFilter`
-- Blacklisted tokens on logout
-
-### Authorization
-
-| Endpoint                    | Access             |
-|-----------------------------|--------------------|
-| `GET /api/products`         | Public             |
-| `POST /api/products`        | ADMIN              |
-| `PUT /api/products/{id}`    | ADMIN              |
-| `DELETE /api/products/{id}` | ADMIN              |
-| `/api/cart/**`              | Authenticated USER |
-| `/api/wishlist/**`          | Authenticated USER |
-| `/api/orders/**`            | Authenticated USER |
-| Reading чужих заказов       | ❌ Forbidden        |
-
-> **Important:**  
-> User identity is never taken from request parameters.  
-> Ownership is validated using JWT claims from `SecurityContext`.
-
-This protects the API from **IDOR vulnerabilities** (Insecure Direct Object Reference).
-
----
-
-## 🧪 Testing Strategy
-
-The project contains a **full integration test suite**, covering both
-business logic and security rules.
-
-### Covered Scenarios
-
-- JWT filter & security chain
-- Product access control (USER vs ADMIN)
-- Cart / Wishlist CRUD flows
-- Order placement & cart cleanup
-- Order ownership validation
-- Unauthorized / forbidden access scenarios
-- Authentication & logout flows
-
-### Test Infrastructure
-
-- JUnit 5 + MockMvc
-- Real Spring context (`@SpringBootTest`)
-- FK-aware database cleanup via shared `DbCleaner`
-- Deterministic test execution
-
-> Integration tests are treated as first-class citizens, not optional checks.
-
----
-
-## 🛠 Tech Stack
+## Технологический стэк
 
 - Java 17
 - Spring Boot 3
-- Spring Security
+- Spring Security (JWT)
 - Spring Data JPA (Hibernate)
 - MySQL
-- JWT (jjwt)
+- Docker
 - JUnit 5
-- MockMvc
-- MapStruct
-- Lombok
+- GitHub Actions (CI)
 
 ---
 
-## ▶️ Run Locally
+## Функциональные возможности
 
-### Prerequisites
-- Java 17+
-- MySQL
-
-### Steps
-
-1. Configure database and JWT in `application.properties`
-2. Run tests: 
-   ```bash
-   mvn clean test
-   ```
-3. Run application:
-   ```bash
-   mvn spring-boot:run
-   ```
----
-## 📁 Project Structure (Simplified)
-src/main/java/com/ecommerce
-- ├── config
-- ├── security
-- ├── service
-- ├── persistence
-- │ ├── model
-- │   └── repository
-- ├── web
-- │   ├── controller
-- │   ├── dto
-- │   └── mapper
-
-src/test/java/com/ecommerce
-- ├── cart
-- ├── order
-- ├── security
-- ├── wishlist
-- ├── service
-- └── testutil (DbCleaner)
+- Аутентификация и авторизация пользователей
+- Ролевая модель доступа (USER / ADMIN)
+- REST API для управления товарами
+- Корзина пользователя
+- Оформление заказов
+- Wishlist (избранные товары)
+- Защищённая работа с пользовательскими данными
+- Unit и integration тестирование
+- Автоматическая проверка сборки в CI
 
 ---
 
-## 📌 Notes
+## Цель проекта
 
-This repository focuses on backend responsibilities only
-The project is designed to be used with a separate frontend (SPA)
+Цель проекта - продемонстрировать:
+
+- понимание backend-архитектуры на Spring Boot
+- корректную реализацию безопасности
+- бизнес-логику e-commerce приложения
+- осознанный подход к тестированию и качеству кода
+
+Полная техническая документация доступна в файле:
+[README-TECH.md](README-TECH.md)
