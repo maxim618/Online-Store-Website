@@ -16,8 +16,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get; // если GET
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post; // для /auth/login
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
@@ -26,15 +26,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class AdminProductsIntegrationTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
+    @Autowired private MockMvc mockMvc;
+    @Autowired private UserRepository userRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private DbCleaner dbCleaner;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -42,7 +36,6 @@ class AdminProductsIntegrationTest {
     @BeforeEach
     void setUp() {
         dbCleaner.clean();
-//        userRepository.deleteAll();
 
         // обычный пользователь
         UserEntity user = new UserEntity();
