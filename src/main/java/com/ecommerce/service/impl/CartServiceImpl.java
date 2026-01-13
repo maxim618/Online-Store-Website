@@ -121,7 +121,7 @@ public class CartServiceImpl implements CartService {
      * Ожидается, что в Product есть поле quantity (или stock).
      */
     private void validateStock(Product product, int desiredQty) {
-        Integer stock = product.getQuantity(); // если поле называется иначе — поправь
+        Integer stock = product.getQuantity();
 
         if (stock != null && desiredQty > stock) {
             throw new IllegalArgumentException(
