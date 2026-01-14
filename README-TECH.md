@@ -140,7 +140,7 @@ Online Store Website - backend - приложение интернет-мага�
 
 ### Redis / Valkey test mode
 
-By default, CI runs tests with JPA-based cart storage.
+По умолчанию CI запускает тесты с использованием хранилища корзин на основе JPA.
 
 ---
 
