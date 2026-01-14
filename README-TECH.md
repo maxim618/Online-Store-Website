@@ -138,6 +138,12 @@ Online Store Website - backend - приложение интернет-мага�
 
 ---
 
+### Redis / Valkey test mode
+
+By default, CI runs tests with JPA-based cart storage.
+
+---
+
 ##  Контейнеризация - Docker
 
 Для локального запуска используется Docker Compose:
