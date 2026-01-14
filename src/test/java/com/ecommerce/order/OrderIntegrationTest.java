@@ -7,6 +7,7 @@ import com.ecommerce.persistence.repository.UserRepository;
 import com.ecommerce.persistence.repository.ProductRepository;
 import com.ecommerce.persistence.repository.CategoryRepository;
 import com.ecommerce.testutil.DbCleaner;
+import com.ecommerce.testutil.ValkeyTestCleaner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +43,7 @@ class OrderIntegrationTest {
     @Autowired private CategoryRepository categoryRepository;
     @Autowired private DbCleaner dbCleaner;
     @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired ValkeyTestCleaner valkeyTestCleaner;
 
     private Long userId;
     private Long productId;
@@ -49,8 +51,8 @@ class OrderIntegrationTest {
 
     @BeforeEach
     void setUp() throws Exception {
-
         dbCleaner.clean();
+        valkeyTestCleaner.clearAll();
 
         UserEntity user = new UserEntity();
         user.setEmail("user@mail.com");
@@ -107,7 +109,7 @@ class OrderIntegrationTest {
 
     @Test
     void orderFlow_shouldPlaceOrder_clearCart_andAllowReadingOrders() throws Exception {
-        // 1) Добавляем товар в корзину (quantity=2)
+        // 1 Добавляем товар в корзину (quantity=2)
         mockMvc.perform(post("/api/cart/add")
                         .param("userId", userId.toString())
                         .param("productId", productId.toString())
@@ -115,7 +117,7 @@ class OrderIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
 
-        // 2) Оформляем заказ
+        // 2 Оформляем заказ
         String orderJson = mockMvc.perform(post("/api/orders/place")
                         .param("userId", userId.toString())
                         .header("Authorization", "Bearer " + token))
@@ -139,14 +141,14 @@ class OrderIntegrationTest {
         long orderId = objectMapper.readTree(orderJson).get("id").asLong();
 
 
-        // 3) Корзина должна стать пустой
+        // 3 Корзина должна стать пустой
         mockMvc.perform(get("/api/cart/count")
                         .param("userId", userId.toString())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(content().string("0"));
 
-        // 4) Получаем список заказов пользователя
+        // 4 Получаем список заказов пользователя
         mockMvc.perform(get("/api/orders")
                         .param("userId", userId.toString())
                         .header("Authorization", "Bearer " + token))
@@ -154,7 +156,7 @@ class OrderIntegrationTest {
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].id").value((int) orderId));
 
-        // 5) Получаем заказ по id
+        // 5 Получаем заказ по id
         mockMvc.perform(get("/api/orders/{id}", orderId)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
