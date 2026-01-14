@@ -1,98 +1,91 @@
 package com.ecommerce.service.impl;
 
-import com.ecommerce.exception.EntityNotFoundException;
-import com.ecommerce.persistence.model.CartItem;
+import com.ecommerce.cart.domain.CartStorage;
 import com.ecommerce.persistence.model.Product;
-import com.ecommerce.persistence.repository.CartItemRepository;
 import com.ecommerce.persistence.repository.ProductRepository;
 import com.ecommerce.service.interfaces.CartService;
 import com.ecommerce.web.dto.CartDto;
 import com.ecommerce.web.dto.CartItemDto;
-import com.ecommerce.web.mapper.CartMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class CartServiceImpl implements CartService {
 
-    private final CartItemRepository cartItemRepository;
+    private final CartStorage cartStorage;
     private final ProductRepository productRepository;
-    private final CartMapper cartMapper;
 
     @Override
     public void addItem(Long userId, Long productId, int quantity) {
-        if (quantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be positive");
-        }
-
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found: " + productId));
-
-        CartItem cartItem = cartItemRepository
-                .findByUserIdAndProduct_Id(userId, productId)
-                .orElse(null);
-
-        int newQty = quantity;
-        if (cartItem != null) {
-            newQty = cartItem.getQuantity() + quantity;
-        }
-
-        validateStock(product, newQty);
-
-        if (cartItem == null) {
-            cartItem = CartItem.builder()
-                    .userId(userId)
-                    .product(product)
-                    .quantity(newQty)
-                    .build();
-        } else {
-            cartItem.setQuantity(newQty);
-        }
-
-        cartItemRepository.save(cartItem);
+        cartStorage.addItem(userId, productId, quantity);
     }
 
     @Override
     public void setItemQuantity(Long userId, Long productId, int quantity) {
-        CartItem cartItem = cartItemRepository
-                .findByUserIdAndProduct_Id(userId, productId)
-                .orElseThrow(() ->
-                        new EntityNotFoundException("Cart item not found for product " + productId));
-
-        if (quantity <= 0) {
-            // если 0 или меньше — просто убираем товар из корзины
-            cartItemRepository.delete(cartItem);
-            return;
-        }
-
-        validateStock(cartItem.getProduct(), quantity);
-        cartItem.setQuantity(quantity);
-
-        cartItemRepository.save(cartItem);
+        cartStorage.setItemQuantity(userId, productId, quantity);
     }
 
     @Override
     public void removeItem(Long userId, Long productId) {
-        cartItemRepository.deleteByUserIdAndProduct_Id(userId, productId);
+        cartStorage.removeItem(userId, productId);
     }
 
     @Override
     public void clearCart(Long userId) {
-        cartItemRepository.deleteByUserId(userId);
+        cartStorage.clearCart(userId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public CartDto getUserCart(Long userId) {
-        List<CartItem> items = cartItemRepository.findByUserId(userId);
 
-        List<CartItemDto> itemDtos = items.stream()
-                .map(cartMapper::toDto)
+        Map<Long, Integer> items = cartStorage.getItems(userId); // productId -> qty
+
+        if (items.isEmpty()) {
+            CartDto empty = new CartDto();
+            empty.setItems(List.of());
+            empty.setTotalPrice(0.0);
+            empty.setTotalQuantity(0);
+            return empty;
+        }
+
+        List<Long> productIds = new ArrayList<>(items.keySet());
+
+        List<Product> products = productRepository.findAllById(productIds);
+
+        Map<Long, Product> productById = products.stream()
+                .collect(Collectors.toMap(Product::getId, p -> p));
+
+        List<CartItemDto> itemDtos = productIds.stream()
+                .map(pid -> {
+                    Product p = productById.get(pid);
+                    if (p == null) {
+                        // если товар удалили из каталога — пропускаем позицию
+                        return null;
+                    }
+
+                    int qty = items.get(pid);
+
+                    CartItemDto dto = new CartItemDto();
+                    dto.setProductId(p.getId());
+                    dto.setProductTitle(p.getTitle());
+                    dto.setUnitPrice(p.getPrice());
+                    dto.setQuantity(qty);
+
+                    double lineTotal = (p.getPrice() != null ? p.getPrice() : 0.0) * qty;
+                    dto.setLineTotal(lineTotal);
+
+                    return dto;
+                })
+                .filter(Objects::nonNull)
                 .toList();
 
         double totalPrice = itemDtos.stream()
@@ -113,21 +106,6 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional(readOnly = true)
     public long getCartItemCount(Long userId) {
-        return cartItemRepository.countByUserId(userId);
-    }
-
-    /**
-     * Проверка, что мы не заказываем больше, чем есть на складе.
-     * Ожидается, что в Product есть поле quantity (или stock).
-     */
-    private void validateStock(Product product, int desiredQty) {
-        Integer stock = product.getQuantity();
-
-        if (stock != null && desiredQty > stock) {
-            throw new IllegalArgumentException(
-                    "Not enough stock for product " + product.getId() +
-                            ": requested=" + desiredQty + ", available=" + stock
-            );
-        }
+        return cartStorage.getItems(userId).size();
     }
 }
