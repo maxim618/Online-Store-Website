@@ -5,6 +5,7 @@ import com.ecommerce.persistence.model.UserEntity;
 import com.ecommerce.persistence.repository.ProductRepository;
 import com.ecommerce.persistence.repository.UserRepository;
 import com.ecommerce.testutil.DbCleaner;
+import com.ecommerce.testutil.ValkeyTestCleaner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +38,7 @@ class CartIntegrationTest {
     @Autowired private ProductRepository productRepository;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired DbCleaner dbCleaner;
+    @Autowired ValkeyTestCleaner valkeyTestCleaner;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -46,6 +48,7 @@ class CartIntegrationTest {
     @BeforeEach
     void setUp() {
         dbCleaner.clean();
+        valkeyTestCleaner.clearAll();
 
         // 1. Пользователь
         UserEntity user = new UserEntity();
@@ -89,14 +92,14 @@ class CartIntegrationTest {
     void fullCartCrudFlow() throws Exception {
         String token = loginAndGetToken("cart-user@mail.com", "123");
 
-        // 0) Стартовое состояние – корзина пустая
+        // 0 Стартовое состояние – корзина пустая
         mockMvc.perform(get("/api/cart/count")
                         .param("userId", userId.toString())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(content().string("0"));
 
-        // 1) CREATE: добавляем товар в корзину (quantity=2)
+        // 1 CREATE: добавляем товар в корзину (quantity=2)
         // Примечание: getCartItemCount возвращает количество разных товаров (записей), а не общее количество
         mockMvc.perform(post("/api/cart/add")
                         .param("userId", userId.toString())
@@ -105,24 +108,21 @@ class CartIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
 
-        // 2) READ: проверяем count = 1 (одна запись в корзине, но при этом quantity=2)
+        // 2 READ: проверяем count = 1 (одна запись в корзине, но при этом quantity=2)
         mockMvc.perform(get("/api/cart/count")
                         .param("userId", userId.toString())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(content().string("1"));
 
-        //2.1 проверяем quantity = 2
+        // 2.1 проверяем quantity = 2
         mockMvc.perform(get("/api/cart")
                         .param("userId", userId.toString())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].quantity").value(2));
 
-
-
-
-        // 3) UPDATE: меняем количество на 5
+        // 3 UPDATE: меняем количество на 5
         mockMvc.perform(post("/api/cart/set")
                         .param("userId", userId.toString())
                         .param("productId", productId.toString())
@@ -130,14 +130,14 @@ class CartIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
 
-        // 4) READ: count все еще = 1 (одна запись, но quantity теперь 5)
+        // 4 READ: count все еще = 1 (одна запись, но quantity теперь 5)
         mockMvc.perform(get("/api/cart/count")
                         .param("userId", userId.toString())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(content().string("1"));
 
-        //4.1) проверяем, что quantity = 5
+        //4.1 проверяем, что quantity = 5
         mockMvc.perform(get("/api/cart")
                         .param("userId", userId.toString())
                         .header("Authorization", "Bearer " + token))
@@ -145,21 +145,21 @@ class CartIntegrationTest {
                 .andExpect(jsonPath("$.items[0].quantity").value(5));
 
 
-        // 5) DELETE : удаляем товар
+        // 5 DELETE : удаляем товар
         mockMvc.perform(delete("/api/cart/remove")
                         .param("userId", userId.toString())
                         .param("productId", productId.toString())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
 
-        // 6) READ: корзина пустая
+        // 6 READ: корзина пустая
         mockMvc.perform(get("/api/cart/count")
                         .param("userId", userId.toString())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(content().string("0"));
 
-        // 7) ADD снова + очистка
+        // 7 ADD снова + очистка
         mockMvc.perform(post("/api/cart/add")
                         .param("userId", userId.toString())
                         .param("productId", productId.toString())
