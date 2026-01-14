@@ -7,6 +7,7 @@ import com.ecommerce.persistence.repository.UserRepository;
 import com.ecommerce.persistence.repository.ProductRepository;
 import com.ecommerce.persistence.repository.CategoryRepository;
 import com.ecommerce.testutil.DbCleaner;
+import com.ecommerce.testutil.ValkeyTestCleaner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +39,8 @@ class OrderOwnershipSecurityIntegrationTest {
     @Autowired private ProductRepository productRepository;
     @Autowired private CategoryRepository categoryRepository;
     @Autowired private DbCleaner dbCleaner;
+    @Autowired(required = false)
+    ValkeyTestCleaner valkeyTestCleaner;
 
     @Autowired private PasswordEncoder passwordEncoder;
 
@@ -54,6 +57,9 @@ class OrderOwnershipSecurityIntegrationTest {
     void setUp() throws Exception {
 
         dbCleaner.clean();
+        if (valkeyTestCleaner != null) {
+            valkeyTestCleaner.clearAll();
+        }
 
         // два пользователя
         user1Id = userRepository.save(mkUser("user1@mail.com", "User1", "ROLE_USER")).getId();

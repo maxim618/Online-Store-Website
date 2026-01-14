@@ -3,6 +3,7 @@ package com.ecommerce.security;
 import com.ecommerce.persistence.model.UserEntity;
 import com.ecommerce.persistence.repository.UserRepository;
 import com.ecommerce.testutil.DbCleaner;
+import com.ecommerce.testutil.ValkeyTestCleaner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,12 +31,16 @@ class SecurityIntegrationTest {
     @Autowired private UserRepository userRepository;
     @Autowired private DbCleaner dbCleaner;
     @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired(required = false)
+    ValkeyTestCleaner valkeyTestCleaner;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
-
         dbCleaner.clean();
+        if (valkeyTestCleaner != null) {
+            valkeyTestCleaner.clearAll();
+        }
 
         // создаём обычного пользователя
         createUser("user@mail.com", "ROLE_USER", "123");
@@ -76,21 +81,21 @@ class SecurityIntegrationTest {
         return node.get("token").asText();
     }
 
-    // 1) публичный эндпоинт без токена
+    // 1 публичный эндпоинт без токена
     @Test
     void publicEndpointShouldNotBeAccessibleWithoutToken() throws Exception {
         mockMvc.perform(get("/api/categories"))
                 .andExpect(status().isUnauthorized());
     }
 
-    // 2) защищённый эндпоинт без токена → 401
+    // 2 защищённый эндпоинт без токена → 401
     @Test
     void adminEndpointWithoutTokenShouldReturn401() throws Exception {
         mockMvc.perform(get("/admin/status"))
                 .andExpect(status().isUnauthorized());
     }
 
-    // 3) user-токен не должен пускать в /admin/status → 403
+    // 3 user-токен не должен пускать в /admin/status → 403
     @Test
     void userTokenShouldNotAccessAdminEndpoint() throws Exception {
         String token = loginAndGetToken("user@mail.com", "123");
@@ -100,7 +105,7 @@ class SecurityIntegrationTest {
                 .andExpect(status().isForbidden());
     }
 
-    // 4) admin-токен должен пускать в /admin/status → 200
+    // 4 admin-токен должен пускать в /admin/status → 200
     @Test
     void adminTokenShouldAccessAdminEndpoint() throws Exception {
         String token = loginAndGetToken("admin@mail.com", "123");
@@ -110,8 +115,8 @@ class SecurityIntegrationTest {
                 .andExpect(status().isOk());
     }
 
-    // 5) user-токен должен иметь доступ к любому authenticated эндпоинту
-    // (пример: /api/cart, если он не в permitAll)
+    // 5 user-токен должен иметь доступ к любому authenticated эндпоинту
+    // (например /api/cart, если он не находится в permitAll)
     @Test
     void userTokenShouldAccessAuthenticatedEndpoint() throws Exception {
         String token = loginAndGetToken("user@mail.com", "123");
@@ -119,7 +124,7 @@ class SecurityIntegrationTest {
         mockMvc.perform(get("/api/cart")
                         .param("userId", "1")
                         .header("Authorization", "Bearer " + token))
-                // тут важно, что уже не 401/403, а либо 200,
+                // должно быть не 401/403, а 200,
                 // либо другая бизнес-ошибка, если что-то не так в сервисе
                 .andExpect(status().isOk());
     }

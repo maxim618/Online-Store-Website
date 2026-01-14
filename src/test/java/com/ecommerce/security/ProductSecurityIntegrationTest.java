@@ -7,6 +7,7 @@ import com.ecommerce.persistence.repository.CategoryRepository;
 import com.ecommerce.persistence.repository.ProductRepository;
 import com.ecommerce.persistence.repository.UserRepository;
 import com.ecommerce.testutil.DbCleaner;
+import com.ecommerce.testutil.ValkeyTestCleaner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,21 +36,23 @@ class ProductSecurityIntegrationTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
-
     @Autowired private UserRepository userRepository;
     @Autowired private ProductRepository productRepository;
     @Autowired private CategoryRepository categoryRepository;
-
     @Autowired private DbCleaner dbCleaner;
     @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired(required = false)
+    ValkeyTestCleaner valkeyTestCleaner;
 
     private Long categoryId;
     private Long productId;
 
     @BeforeEach
     void setUp() {
-
         dbCleaner.clean();
+        if (valkeyTestCleaner != null) {
+            valkeyTestCleaner.clearAll();
+        }
 
         // USER
         UserEntity user = new UserEntity();
@@ -219,7 +222,6 @@ class ProductSecurityIntegrationTest {
     void delete_withAdminToken_shouldReturn200or204() throws Exception {
         String adminToken = loginAndGetToken("admin@mail.com", "123");
 
-        // у тебя delete() в контроллере void -> часто это 200 или 204, зависит от реализации
         mockMvc.perform(delete("/api/products/{id}", productId)
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().is2xxSuccessful());

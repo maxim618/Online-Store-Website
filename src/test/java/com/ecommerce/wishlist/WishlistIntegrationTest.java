@@ -7,6 +7,7 @@ import com.ecommerce.persistence.repository.CategoryRepository;
 import com.ecommerce.persistence.repository.ProductRepository;
 import com.ecommerce.persistence.repository.UserRepository;
 import com.ecommerce.testutil.DbCleaner;
+import com.ecommerce.testutil.ValkeyTestCleaner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +41,8 @@ class WishlistIntegrationTest {
     @Autowired private CategoryRepository categoryRepository;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private DbCleaner dbCleaner;
+    @Autowired(required = false)
+    ValkeyTestCleaner valkeyTestCleaner;
 
     private Long userId;
     private Long productId;
@@ -47,8 +50,10 @@ class WishlistIntegrationTest {
 
     @BeforeEach
     void setUp() throws Exception {
-
         dbCleaner.clean();
+        if (valkeyTestCleaner != null) {
+            valkeyTestCleaner.clearAll();
+        }
 
         UserEntity user = new UserEntity();
         user.setEmail("user@mail.com");
@@ -90,18 +95,18 @@ class WishlistIntegrationTest {
     @Test
     void wishlistCrud_shouldWork_forAuthorizedUser() throws Exception {
 
-        // 0) без токена -> 401
+        // 0 без токена -> 401
         mockMvc.perform(get("/api/wishlist").param("userId", userId.toString()))
                 .andExpect(status().isUnauthorized());
 
-        // 1) add
+        // 1 add
         mockMvc.perform(post("/api/wishlist/add")
                         .param("userId", userId.toString())
                         .param("productId", productId.toString())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
 
-        // 2) exists -> true
+        // 2 exists -> true
         mockMvc.perform(get("/api/wishlist/exists")
                         .param("userId", userId.toString())
                         .param("productId", productId.toString())
@@ -109,7 +114,7 @@ class WishlistIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("true"));
 
-        // 3) get -> список содержит товар
+        // 3 get -> список содержит товар
         mockMvc.perform(get("/api/wishlist")
                         .param("userId", userId.toString())
                         .header("Authorization", "Bearer " + token))
@@ -118,14 +123,14 @@ class WishlistIntegrationTest {
                 // поле зависит от WishlistItemDto: часто productId лежит прямо в dto
                 .andExpect(jsonPath("$[0].productId").value(productId.intValue()));
 
-        // 4) remove
+        // 4 remove
         mockMvc.perform(delete("/api/wishlist/remove")
                         .param("userId", userId.toString())
                         .param("productId", productId.toString())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
 
-        // 5) exists -> false
+        // 5 exists -> false
         mockMvc.perform(get("/api/wishlist/exists")
                         .param("userId", userId.toString())
                         .param("productId", productId.toString())
@@ -133,7 +138,7 @@ class WishlistIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("false"));
 
-        // 6) get -> пусто
+        // 6 get -> пусто
         mockMvc.perform(get("/api/wishlist")
                         .param("userId", userId.toString())
                         .header("Authorization", "Bearer " + token))
@@ -143,21 +148,21 @@ class WishlistIntegrationTest {
     @Test
     void addDuplicate_shouldNotCreateSecondItem() throws Exception {
 
-        // 1) добавили первый раз
+        // 1 добавили первый раз
         mockMvc.perform(post("/api/wishlist/add")
                         .param("userId", userId.toString())
                         .param("productId", productId.toString())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
 
-        // 2) добавили второй раз (дубликат)
+        // 2 добавили второй раз (дубликат)
         mockMvc.perform(post("/api/wishlist/add")
                         .param("userId", userId.toString())
                         .param("productId", productId.toString())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
 
-        // 3) проверяем: список всё равно из 1 элемента (дубль не появился)
+        // 3 проверяем: список всё равно из 1 элемента (дубль не появился)
         mockMvc.perform(get("/api/wishlist")
                         .param("userId", userId.toString())
                         .header("Authorization", "Bearer " + token))
