@@ -23,14 +23,14 @@ public class JwtFilterIntegrationTest {
     @MockBean private JwtService jwtService;
     @MockBean private TokenBlacklistService blacklistService;
 
-    // 1. БЕЗ ТОКЕНА → 401
+    // 1 Без токена → 401
     @Test
     void requestWithoutTokenShouldReturn401() throws Exception {
         mockMvc.perform(get("/test/secure"))
                 .andExpect(status().isUnauthorized());
     }
 
-    // 2. ТОКЕН ЕСТЬ, НО НЕДЕЙСТВИТЕЛЬНЫЙ → 401
+    // 2 Токен есть, но не действительный → 401
     @Test
     void invalidTokenShouldReturn401() throws Exception {
 
@@ -41,7 +41,7 @@ public class JwtFilterIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // 3. ТОКЕН В BLACKLIST → 401
+    // 3 Токен в blacklist → 401
     @Test
     void blacklistedTokenShouldReturn401() throws Exception {
 
@@ -53,7 +53,7 @@ public class JwtFilterIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // 4. ВАЛИДНЫЙ ТОКЕН → 200 ОК
+    // 4 Валидный токен → 200 ОК
     @Test
     void validTokenShouldPassFilter() throws Exception {
 
