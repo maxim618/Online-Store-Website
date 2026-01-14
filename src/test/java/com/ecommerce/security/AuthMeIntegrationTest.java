@@ -45,7 +45,7 @@ class AuthMeIntegrationTest {
         userRepository.save(user);
     }
 
-    // 1) /auth/me must return user with valid token
+    // 1 /auth/me - must return user with valid token
     @Test
     void authMeShouldReturnUserWithValidToken() throws Exception {
 
@@ -56,7 +56,7 @@ class AuthMeIntegrationTest {
                 }
                 """;
 
-        // 1. Login -> receive token
+        // 1.1 Login -> receive token
         String response = mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginJson))
@@ -68,7 +68,7 @@ class AuthMeIntegrationTest {
         JsonNode json = mapper.readTree(response);
         String token = json.get("token").asText();
 
-        // 2. Call /auth/me with token
+        // 1.2 Call /auth/me with token
         mockMvc.perform(get("/auth/me")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
@@ -77,7 +77,7 @@ class AuthMeIntegrationTest {
                 .andExpect(jsonPath("$.role").value("ROLE_USER"));
     }
 
-    // 2) Invalid token -> 401
+    // 2 Invalid token -> 401
     @Test
     void authMeShouldReturn401WithInvalidToken() throws Exception {
         mockMvc.perform(get("/auth/me")
@@ -85,7 +85,7 @@ class AuthMeIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // 3) No token -> 401
+    // 3 No token -> 401
     @Test
     void authMeShouldReturn401WhenNoToken() throws Exception {
         mockMvc.perform(get("/auth/me"))
