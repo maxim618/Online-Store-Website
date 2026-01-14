@@ -28,13 +28,8 @@ class AuthLogoutIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
+    @Autowired private UserRepository userRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private DbCleaner dbCleaner;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -42,14 +37,13 @@ class AuthLogoutIntegrationTest {
     @BeforeEach
     void setUp() {
         dbCleaner.clean();
-//        userRepository.deleteAll();
 
         UserEntity user = new UserEntity();
         user.setEmail("john_logout@mail.com");
         user.setName("John Logout");
         user.setRole("ROLE_USER");
         user.setPassword(passwordEncoder.encode("123"));
-        user.setEnabled(true); // ОБЯЗАТЕЛЬНО, иначе DisabledException при логине
+        user.setEnabled(true); // иначе DisabledException при логине
 
         userRepository.save(user);
     }
