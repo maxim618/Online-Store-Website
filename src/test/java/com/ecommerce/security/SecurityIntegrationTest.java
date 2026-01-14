@@ -3,6 +3,7 @@ package com.ecommerce.security;
 import com.ecommerce.persistence.model.UserEntity;
 import com.ecommerce.persistence.repository.UserRepository;
 import com.ecommerce.testutil.DbCleaner;
+import com.ecommerce.testutil.ValkeyTestCleaner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,11 +31,13 @@ class SecurityIntegrationTest {
     @Autowired private UserRepository userRepository;
     @Autowired private DbCleaner dbCleaner;
     @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired ValkeyTestCleaner valkeyTestCleaner;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
         dbCleaner.clean();
+        valkeyTestCleaner.clearAll();
 
         // создаём обычного пользователя
         createUser("user@mail.com", "ROLE_USER", "123");
