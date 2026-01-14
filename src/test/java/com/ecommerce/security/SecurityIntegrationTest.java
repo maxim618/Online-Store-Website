@@ -31,13 +31,16 @@ class SecurityIntegrationTest {
     @Autowired private UserRepository userRepository;
     @Autowired private DbCleaner dbCleaner;
     @Autowired private PasswordEncoder passwordEncoder;
-    @Autowired ValkeyTestCleaner valkeyTestCleaner;
+    @Autowired(required = false)
+    ValkeyTestCleaner valkeyTestCleaner;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
         dbCleaner.clean();
-        valkeyTestCleaner.clearAll();
+        if (valkeyTestCleaner != null) {
+            valkeyTestCleaner.clearAll();
+        }
 
         // создаём обычного пользователя
         createUser("user@mail.com", "ROLE_USER", "123");

@@ -41,7 +41,8 @@ class ProductSecurityIntegrationTest {
     @Autowired private CategoryRepository categoryRepository;
     @Autowired private DbCleaner dbCleaner;
     @Autowired private PasswordEncoder passwordEncoder;
-    @Autowired ValkeyTestCleaner valkeyTestCleaner;
+    @Autowired(required = false)
+    ValkeyTestCleaner valkeyTestCleaner;
 
     private Long categoryId;
     private Long productId;
@@ -49,7 +50,9 @@ class ProductSecurityIntegrationTest {
     @BeforeEach
     void setUp() {
         dbCleaner.clean();
-        valkeyTestCleaner.clearAll();
+        if (valkeyTestCleaner != null) {
+            valkeyTestCleaner.clearAll();
+        }
 
         // USER
         UserEntity user = new UserEntity();

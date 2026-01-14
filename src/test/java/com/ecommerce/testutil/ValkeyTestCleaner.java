@@ -1,11 +1,13 @@
 package com.ecommerce.testutil;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "cart.storage", havingValue = "redis")
 public class ValkeyTestCleaner {
 
     private final StringRedisTemplate redis;

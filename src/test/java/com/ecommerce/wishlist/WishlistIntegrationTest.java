@@ -41,7 +41,8 @@ class WishlistIntegrationTest {
     @Autowired private CategoryRepository categoryRepository;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private DbCleaner dbCleaner;
-    @Autowired ValkeyTestCleaner valkeyTestCleaner;
+    @Autowired(required = false)
+    ValkeyTestCleaner valkeyTestCleaner;
 
     private Long userId;
     private Long productId;
@@ -50,7 +51,9 @@ class WishlistIntegrationTest {
     @BeforeEach
     void setUp() throws Exception {
         dbCleaner.clean();
-        valkeyTestCleaner.clearAll();
+        if (valkeyTestCleaner != null) {
+            valkeyTestCleaner.clearAll();
+        }
 
         UserEntity user = new UserEntity();
         user.setEmail("user@mail.com");

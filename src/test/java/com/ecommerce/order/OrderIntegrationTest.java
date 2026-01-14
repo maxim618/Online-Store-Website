@@ -43,7 +43,8 @@ class OrderIntegrationTest {
     @Autowired private CategoryRepository categoryRepository;
     @Autowired private DbCleaner dbCleaner;
     @Autowired private PasswordEncoder passwordEncoder;
-    @Autowired ValkeyTestCleaner valkeyTestCleaner;
+    @Autowired(required = false)
+    ValkeyTestCleaner valkeyTestCleaner;
 
     private Long userId;
     private Long productId;
@@ -52,7 +53,9 @@ class OrderIntegrationTest {
     @BeforeEach
     void setUp() throws Exception {
         dbCleaner.clean();
-        valkeyTestCleaner.clearAll();
+        if (valkeyTestCleaner != null) {
+            valkeyTestCleaner.clearAll();
+        }
 
         UserEntity user = new UserEntity();
         user.setEmail("user@mail.com");

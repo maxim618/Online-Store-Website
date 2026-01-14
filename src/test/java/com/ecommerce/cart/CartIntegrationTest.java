@@ -38,7 +38,8 @@ class CartIntegrationTest {
     @Autowired private ProductRepository productRepository;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired DbCleaner dbCleaner;
-    @Autowired ValkeyTestCleaner valkeyTestCleaner;
+    @Autowired(required = false)
+    ValkeyTestCleaner valkeyTestCleaner;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -48,7 +49,9 @@ class CartIntegrationTest {
     @BeforeEach
     void setUp() {
         dbCleaner.clean();
-        valkeyTestCleaner.clearAll();
+        if (valkeyTestCleaner != null) {
+            valkeyTestCleaner.clearAll();
+        }
 
         // 1. Пользователь
         UserEntity user = new UserEntity();
