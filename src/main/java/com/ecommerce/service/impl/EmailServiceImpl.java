@@ -2,6 +2,7 @@ package com.ecommerce.service.impl;
 
 import com.ecommerce.service.interfaces.EmailService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "app.email", name = "enabled", havingValue = "true")
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
