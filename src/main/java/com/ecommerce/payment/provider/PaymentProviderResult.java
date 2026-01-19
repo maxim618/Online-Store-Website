@@ -1,6 +1,9 @@
 package com.ecommerce.payment.provider;
 
 
+import lombok.Getter;
+
+@Getter
 public class PaymentProviderResult {
 
     private final String externalPaymentId;
@@ -9,13 +12,5 @@ public class PaymentProviderResult {
     public PaymentProviderResult(String externalPaymentId, String paymentUrl) {
         this.externalPaymentId = externalPaymentId;
         this.paymentUrl = paymentUrl;
-    }
-
-    public String getExternalPaymentId() {
-        return externalPaymentId;
-    }
-
-    public String getPaymentUrl() {
-        return paymentUrl;
     }
 }
