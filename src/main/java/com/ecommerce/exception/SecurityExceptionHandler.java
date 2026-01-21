@@ -13,15 +13,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
-/**
- * Красивый и структурированный обработчик ошибок Security / JWT.
- */
+ // обработчик ошибок Security / JWT.
+
 @ControllerAdvice
 public class SecurityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(SecurityExceptionHandler.class);
 
-    // --- 403: Нет прав доступа -----------------------------------------------------
+    //  403: Нет прав доступа
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<String> handleAccessDenied(AccessDeniedException e) {
@@ -31,7 +30,7 @@ public class SecurityExceptionHandler {
                 .body("Access denied: insufficient permissions.");
     }
 
-    // --- 401: Неправильные креды ----------------------------------------------------
+    //  401: Неправильные креды
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<String> handleBadCredentials(BadCredentialsException e) {
@@ -41,7 +40,7 @@ public class SecurityExceptionHandler {
                 .body("Invalid email or password.");
     }
 
-    // --- 401: Ошибки аутентификации -------------------------------------------------
+    //  401: Ошибки аутентификации
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<String> handleAuthException(AuthenticationException e) {
@@ -51,7 +50,7 @@ public class SecurityExceptionHandler {
                 .body("Authentication failed.");
     }
 
-    // --- 401: JWT истёк -------------------------------------------------------------
+    //  401: JWT истёк
 
     @ExceptionHandler(ExpiredJwtException.class)
     public ResponseEntity<String> handleExpiredJwt(ExpiredJwtException e) {
@@ -61,7 +60,7 @@ public class SecurityExceptionHandler {
                 .body("Token expired. Please login again.");
     }
 
-    // --- 401: JWT подпись неверная -------------------------------------------------
+    //  401: JWT подпись неверная
 
     @ExceptionHandler(SignatureException.class)
     public ResponseEntity<String> handleSignatureError(SignatureException e) {
@@ -71,7 +70,7 @@ public class SecurityExceptionHandler {
                 .body("Invalid token signature.");
     }
 
-    // --- 401: JWT malformed ---------------------------------------------------------
+    //  401: JWT malformed
 
     @ExceptionHandler(MalformedJwtException.class)
     public ResponseEntity<String> handleMalformedJwt(MalformedJwtException e) {
@@ -81,7 +80,7 @@ public class SecurityExceptionHandler {
                 .body("Token is malformed.");
     }
 
-    // --- 401: Общая JWT ошибка ------------------------------------------------------
+    //  401: Общая JWT ошибка
 
     @ExceptionHandler({ io.jsonwebtoken.JwtException.class })
     public ResponseEntity<String> handleJwtException(Exception e) {
