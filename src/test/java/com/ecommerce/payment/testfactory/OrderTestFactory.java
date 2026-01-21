@@ -1,4 +1,4 @@
-package com.ecommerce.testfactory;
+package com.ecommerce.payment.testfactory;
 
 import com.ecommerce.persistence.model.Order;
 import com.ecommerce.persistence.model.UserEntity;

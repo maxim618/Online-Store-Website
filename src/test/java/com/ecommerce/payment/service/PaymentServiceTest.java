@@ -4,7 +4,7 @@ import com.ecommerce.payment.domain.Payment;
 import com.ecommerce.payment.domain.PaymentStatus;
 import com.ecommerce.payment.dto.PaymentInitResponseDto;
 import com.ecommerce.payment.repository.PaymentRepository;
-import com.ecommerce.testfactory.OrderTestFactory;
+import com.ecommerce.payment.testfactory.OrderTestFactory;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
