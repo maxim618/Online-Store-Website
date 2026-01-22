@@ -46,6 +46,12 @@ public class Payment {
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
 
+    @Column(name = "idempotency_key", nullable = false, unique = true)
+    private String idempotencyKey;
+
+    @Column(name = "payment_url", nullable = false)
+    private String paymentUrl;
+
     private String externalPaymentId;
 
     private Instant createdAt;
@@ -53,12 +59,13 @@ public class Payment {
 
     // Конструктор для создания нового Payment
     public Payment(Long orderId, PaymentProviderType provider, BigDecimal amount, 
-                   String currency, PaymentStatus status) {
+                   String currency, PaymentStatus status, String idempotencyKey) {
         this.orderId = orderId;
         this.provider = provider;
         this.amount = amount;
         this.currency = currency;
         this.status = status;
+        this.idempotencyKey = idempotencyKey;
         this.createdAt = Instant.now();
     }
 
@@ -70,5 +77,9 @@ public class Payment {
         this.status = PaymentStatus.PENDING;
         this.externalPaymentId = externalPaymentId;
         this.updatedAt = Instant.now();
+    }
+
+    public void setPaymentUrl(String paymentUrl) {
+        this.paymentUrl = paymentUrl;
     }
 }
