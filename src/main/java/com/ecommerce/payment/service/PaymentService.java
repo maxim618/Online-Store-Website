@@ -4,12 +4,14 @@ import com.ecommerce.payment.domain.Payment;
 import com.ecommerce.payment.domain.PaymentProviderType;
 import com.ecommerce.payment.domain.PaymentStatus;
 import com.ecommerce.payment.dto.PaymentInitResponseDto;
+import com.ecommerce.payment.exception.PaymentAlreadyExistsException;
 import com.ecommerce.payment.mapper.PaymentResponseMapper;
 import com.ecommerce.payment.provider.PaymentProvider;
 import com.ecommerce.payment.provider.PaymentProviderResult;
 import com.ecommerce.payment.repository.PaymentRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,6 +27,10 @@ public class PaymentService {
     @Transactional
     public PaymentInitResponseDto initPayment(Long orderId) {
 
+        if (paymentRepository.existsByOrderId(orderId)) {
+            throw new PaymentAlreadyExistsException(orderId);
+        }
+
         Payment payment = new Payment(
                 orderId,
                 PaymentProviderType.MOCK,
@@ -33,12 +39,15 @@ public class PaymentService {
                 PaymentStatus.CREATED
         );
 
+        try {
+            paymentRepository.save(payment);
+        } catch (DataIntegrityViolationException ex) {
+            throw new PaymentAlreadyExistsException(orderId);
+        }
+
         PaymentProvider provider = providerResolver.resolve(payment.getProvider());
         PaymentProviderResult result = provider.createPayment(payment);
-
         payment.markPending(result.getExternalPaymentId());
-
-        paymentRepository.save(payment);
 
         return paymentResponseMapper.toDto(payment, result);
     }
