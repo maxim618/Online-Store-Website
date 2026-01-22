@@ -28,15 +28,14 @@ class PaymentServiceTest {
     private OrderTestFactory orderTestFactory;
 
     @Test
-    void should_create_payment_and_return_payment_url() {
+    void shouldCreatePaymentAndReturnPaymentUrl() {
 
-        // 1 given
         Long orderId = orderTestFactory.createOrderInStatusCreated();
+        String idempotencyKey = "test-key";
 
-        // 2 when
-        PaymentInitResponseDto response = paymentService.initPayment(orderId);
+        PaymentInitResponseDto response =
+                paymentService.initPayment(orderId, idempotencyKey);
 
-        // 3 then
         assertThat(response.getPaymentUrl()).isNotBlank();
         assertThat(response.getPaymentId()).isNotNull();
 
@@ -49,16 +48,33 @@ class PaymentServiceTest {
     }
 
     @Test
-    void shouldThrowExceptionIfPaymentAlreadyExistsForOrder() {
-        // given
+    void shouldFailWhenCreatingSecondPaymentForSameOrder() {
         Long orderId = 1L;
 
-        paymentService.initPayment(orderId);
+        paymentService.initPayment(orderId, "key-1");
 
-        // when / then
-        assertThatThrownBy(() -> paymentService.initPayment(orderId))
+        assertThatThrownBy(() ->
+                paymentService.initPayment(orderId, "key-2")
+        )
                 .isInstanceOf(PaymentAlreadyExistsException.class)
                 .hasMessageContaining("Payment already exists for order");
     }
 
+    @Test
+    void shouldReturnSamePaymentForSameIdempotencyKey() {
+        Long orderId = 1L;
+        String key = "idem-key-123";
+
+        PaymentInitResponseDto first =
+                paymentService.initPayment(orderId, key);
+
+        PaymentInitResponseDto second =
+                paymentService.initPayment(orderId, key);
+
+        assertThat(second.getPaymentId())
+                .isEqualTo(first.getPaymentId());
+
+        assertThat(second.getPaymentUrl())
+                .isEqualTo(first.getPaymentUrl());
+    }
 }
