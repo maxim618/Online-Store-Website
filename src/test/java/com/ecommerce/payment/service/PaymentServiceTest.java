@@ -1,5 +1,7 @@
 package com.ecommerce.payment.service;
 
+import com.ecommerce.abstractTestClasses.AbstractFullDatabaseCleanupTest;
+import com.ecommerce.abstractTestClasses.AbstractPartialDatabaseCleanupTest;
 import com.ecommerce.payment.domain.Payment;
 import com.ecommerce.payment.domain.PaymentStatus;
 import com.ecommerce.payment.dto.PaymentInitResponseDto;
@@ -9,32 +11,28 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ActiveProfiles("test")
 @SpringBootTest
 @Transactional
-class PaymentServiceTest {
+class PaymentServiceTest extends AbstractFullDatabaseCleanupTest {
 
-    @Autowired
-    private PaymentService paymentService;
-
-    @Autowired
-    private PaymentRepository paymentRepository;
-
-    @Autowired
-    private OrderTestFactory orderTestFactory;
+    @Autowired private PaymentService paymentService;
+    @Autowired private PaymentRepository paymentRepository;
+    @Autowired private OrderTestFactory orderTestFactory;
 
     @Test
-    void should_create_payment_and_return_payment_url() {
+    void shouldCreatePaymentAndReturnPaymentUrl() {
 
-        // 1 given
         Long orderId = orderTestFactory.createOrderInStatusCreated();
+        String idempotencyKey = "test-key";
 
-        // 2 when
-        PaymentInitResponseDto response = paymentService.initPayment(orderId);
+        PaymentInitResponseDto response =
+                paymentService.initPayment(orderId, idempotencyKey);
 
-        // 3 then
         assertThat(response.getPaymentUrl()).isNotBlank();
         assertThat(response.getPaymentId()).isNotNull();
 
@@ -44,5 +42,23 @@ class PaymentServiceTest {
         assertThat(payment.getOrderId()).isEqualTo(orderId);
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.PENDING);
         assertThat(payment.getExternalPaymentId()).isNotNull();
+    }
+
+    @Test
+    void shouldReturnSamePaymentForSameIdempotencyKey() {
+        Long orderId = 1L;
+        String key = "idem-key-123";
+
+        PaymentInitResponseDto first =
+                paymentService.initPayment(orderId, key);
+
+        PaymentInitResponseDto second =
+                paymentService.initPayment(orderId, key);
+
+        assertThat(second.getPaymentId())
+                .isEqualTo(first.getPaymentId());
+
+        assertThat(second.getPaymentUrl())
+                .isEqualTo(first.getPaymentUrl());
     }
 }

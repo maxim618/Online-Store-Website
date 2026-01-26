@@ -1,13 +1,12 @@
 package com.ecommerce.order;
 
+import com.ecommerce.abstractTestClasses.AbstractFullDatabaseCleanupTest;
 import com.ecommerce.persistence.model.Category;
 import com.ecommerce.persistence.model.Product;
 import com.ecommerce.persistence.model.UserEntity;
 import com.ecommerce.persistence.repository.UserRepository;
 import com.ecommerce.persistence.repository.ProductRepository;
 import com.ecommerce.persistence.repository.CategoryRepository;
-import com.ecommerce.testutil.DbCleaner;
-import com.ecommerce.testutil.ValkeyTestCleaner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class OrderIntegrationTest {
+class OrderIntegrationTest extends AbstractFullDatabaseCleanupTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
@@ -41,10 +40,8 @@ class OrderIntegrationTest {
     @Autowired private UserRepository userRepository;
     @Autowired private ProductRepository productRepository;
     @Autowired private CategoryRepository categoryRepository;
-    @Autowired private DbCleaner dbCleaner;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired(required = false)
-    ValkeyTestCleaner valkeyTestCleaner;
 
     private Long userId;
     private Long productId;
@@ -52,10 +49,6 @@ class OrderIntegrationTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        dbCleaner.clean();
-        if (valkeyTestCleaner != null) {
-            valkeyTestCleaner.clearAll();
-        }
 
         UserEntity user = new UserEntity();
         user.setEmail("user@mail.com");

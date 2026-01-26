@@ -1,8 +1,8 @@
 package com.ecommerce.security;
 
+import com.ecommerce.abstractTestClasses.AbstractFullDatabaseCleanupTest;
 import com.ecommerce.persistence.model.UserEntity;
 import com.ecommerce.persistence.repository.UserRepository;
-import com.ecommerce.testutil.DbCleaner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,18 +24,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class AdminProductsIntegrationTest {
+class AdminProductsIntegrationTest  extends AbstractFullDatabaseCleanupTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private UserRepository userRepository;
     @Autowired private PasswordEncoder passwordEncoder;
-    @Autowired private DbCleaner dbCleaner;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
-        dbCleaner.clean();
 
         // обычный пользователь
         UserEntity user = new UserEntity();

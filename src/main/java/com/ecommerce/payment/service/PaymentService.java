@@ -4,6 +4,7 @@ import com.ecommerce.payment.domain.Payment;
 import com.ecommerce.payment.domain.PaymentProviderType;
 import com.ecommerce.payment.domain.PaymentStatus;
 import com.ecommerce.payment.dto.PaymentInitResponseDto;
+import com.ecommerce.payment.exception.PaymentAlreadyExistsException;
 import com.ecommerce.payment.mapper.PaymentResponseMapper;
 import com.ecommerce.payment.provider.PaymentProvider;
 import com.ecommerce.payment.provider.PaymentProviderResult;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,23 +25,37 @@ public class PaymentService {
     private final PaymentResponseMapper paymentResponseMapper;
 
     @Transactional
-    public PaymentInitResponseDto initPayment(Long orderId) {
+    public PaymentInitResponseDto initPayment(Long orderId, String idempotencyKey) {
 
-        Payment payment = new Payment(
-                orderId,
-                PaymentProviderType.MOCK,
-                new BigDecimal("100.00"),
-                "RUB",
-                PaymentStatus.CREATED
-        );
+        Optional<Payment> existing = paymentRepository.findByIdempotencyKey(idempotencyKey);
+        if (existing.isPresent()) {
+            return paymentResponseMapper.toDto(existing.get());
+        }
+
+        if (paymentRepository.existsByOrderId(orderId)) {
+            throw new PaymentAlreadyExistsException(orderId);
+        }
+
+        Payment payment = createPayment(orderId, idempotencyKey);
 
         PaymentProvider provider = providerResolver.resolve(payment.getProvider());
         PaymentProviderResult result = provider.createPayment(payment);
 
         payment.markPending(result.getExternalPaymentId());
-
+        payment.setPaymentUrl(result.getPaymentUrl());
         paymentRepository.save(payment);
 
-        return paymentResponseMapper.toDto(payment, result);
+        return paymentResponseMapper.toDto(payment);
+    }
+
+    private Payment createPayment(Long orderId, String idempotencyKey) {
+        return new Payment(
+                orderId,
+                PaymentProviderType.MOCK,
+                new BigDecimal("100.00"),
+                "RUB",
+                PaymentStatus.CREATED,
+                idempotencyKey
+        );
     }
 }

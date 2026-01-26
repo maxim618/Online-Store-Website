@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 
 import java.math.BigDecimal;
@@ -14,7 +15,14 @@ import java.time.Instant;
 
 @Getter
 @Entity
-@Table(name = "payments")
+@Table(
+        name = "payments",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_payment_order_id", columnNames = "order_id"),
+                @UniqueConstraint(name = "uk_payment_idempotency", columnNames = "idempotency_key")
+        }
+)
+
 public class Payment {
 
     @Id
@@ -36,6 +44,12 @@ public class Payment {
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
 
+    @Column(name = "idempotency_key", nullable = false, unique = true)
+    private String idempotencyKey;
+
+    @Column(name = "payment_url", nullable = false)
+    private String paymentUrl;
+
     private String externalPaymentId;
 
     private Instant createdAt;
@@ -43,12 +57,13 @@ public class Payment {
 
     // Конструктор для создания нового Payment
     public Payment(Long orderId, PaymentProviderType provider, BigDecimal amount, 
-                   String currency, PaymentStatus status) {
+                   String currency, PaymentStatus status, String idempotencyKey) {
         this.orderId = orderId;
         this.provider = provider;
         this.amount = amount;
         this.currency = currency;
         this.status = status;
+        this.idempotencyKey = idempotencyKey;
         this.createdAt = Instant.now();
     }
 
@@ -60,5 +75,9 @@ public class Payment {
         this.status = PaymentStatus.PENDING;
         this.externalPaymentId = externalPaymentId;
         this.updatedAt = Instant.now();
+    }
+
+    public void setPaymentUrl(String paymentUrl) {
+        this.paymentUrl = paymentUrl;
     }
 }

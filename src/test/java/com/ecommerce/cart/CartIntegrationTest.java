@@ -1,11 +1,10 @@
 package com.ecommerce.cart;
 
+import com.ecommerce.abstractTestClasses.AbstractFullDatabaseCleanupTest;
 import com.ecommerce.persistence.model.Product;
 import com.ecommerce.persistence.model.UserEntity;
 import com.ecommerce.persistence.repository.ProductRepository;
 import com.ecommerce.persistence.repository.UserRepository;
-import com.ecommerce.testutil.DbCleaner;
-import com.ecommerce.testutil.ValkeyTestCleaner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,15 +30,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class CartIntegrationTest {
+class CartIntegrationTest extends AbstractFullDatabaseCleanupTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private UserRepository userRepository;
     @Autowired private ProductRepository productRepository;
     @Autowired private PasswordEncoder passwordEncoder;
-    @Autowired DbCleaner dbCleaner;
-    @Autowired(required = false)
-    ValkeyTestCleaner valkeyTestCleaner;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -48,10 +44,6 @@ class CartIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        dbCleaner.clean();
-        if (valkeyTestCleaner != null) {
-            valkeyTestCleaner.clearAll();
-        }
 
         // 1. Пользователь
         UserEntity user = new UserEntity();

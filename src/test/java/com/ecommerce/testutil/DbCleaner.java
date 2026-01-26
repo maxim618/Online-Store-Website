@@ -1,5 +1,7 @@
 package com.ecommerce.testutil;
 
+import com.ecommerce.payment.repository.PaymentRepository;
+import com.ecommerce.payment.service.PaymentService;
 import com.ecommerce.persistence.repository.OrderRepository;
 import com.ecommerce.persistence.repository.OrderItemRepository;
 import com.ecommerce.persistence.repository.WishlistRepository;
@@ -21,6 +23,7 @@ public class DbCleaner {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final PaymentRepository paymentRepository;
 
     public void clean() {
         orderItemRepository.deleteAll();
@@ -30,5 +33,6 @@ public class DbCleaner {
         productRepository.deleteAll();
         categoryRepository.deleteAll();
         userRepository.deleteAll();
+        paymentRepository.deleteAll();
     }
 }
