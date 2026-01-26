@@ -1,8 +1,8 @@
 package com.ecommerce.security;
 
+import com.ecommerce.abstractTestClasses.AbstractFullDatabaseCleanupTest;
 import com.ecommerce.persistence.model.UserEntity;
 import com.ecommerce.persistence.repository.UserRepository;
-import com.ecommerce.testutil.DbCleaner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,17 +23,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
-class AuthMeIntegrationTest {
+class AuthMeIntegrationTest extends AbstractFullDatabaseCleanupTest {
 
     @Autowired MockMvc mockMvc;
     @Autowired UserRepository userRepository;
     @Autowired PasswordEncoder passwordEncoder;
-    @Autowired DbCleaner dbCleaner;
     ObjectMapper mapper = new ObjectMapper();
 
     @BeforeEach
     void setup() {
-        dbCleaner.clean();
 
         UserEntity user = new UserEntity();
         user.setEmail("john@mail.com");

@@ -1,13 +1,12 @@
 package com.ecommerce.security;
 
+import com.ecommerce.abstractTestClasses.AbstractFullDatabaseCleanupTest;
 import com.ecommerce.persistence.model.Category;
 import com.ecommerce.persistence.model.Product;
 import com.ecommerce.persistence.model.UserEntity;
 import com.ecommerce.persistence.repository.CategoryRepository;
 import com.ecommerce.persistence.repository.ProductRepository;
 import com.ecommerce.persistence.repository.UserRepository;
-import com.ecommerce.testutil.DbCleaner;
-import com.ecommerce.testutil.ValkeyTestCleaner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,27 +31,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class ProductSecurityIntegrationTest {
+class ProductSecurityIntegrationTest extends AbstractFullDatabaseCleanupTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private UserRepository userRepository;
     @Autowired private ProductRepository productRepository;
     @Autowired private CategoryRepository categoryRepository;
-    @Autowired private DbCleaner dbCleaner;
     @Autowired private PasswordEncoder passwordEncoder;
-    @Autowired(required = false)
-    ValkeyTestCleaner valkeyTestCleaner;
 
     private Long categoryId;
     private Long productId;
 
     @BeforeEach
     void setUp() {
-        dbCleaner.clean();
-        if (valkeyTestCleaner != null) {
-            valkeyTestCleaner.clearAll();
-        }
 
         // USER
         UserEntity user = new UserEntity();

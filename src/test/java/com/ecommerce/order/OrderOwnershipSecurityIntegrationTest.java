@@ -1,13 +1,12 @@
 package com.ecommerce.order;
 
+import com.ecommerce.abstractTestClasses.AbstractFullDatabaseCleanupTest;
 import com.ecommerce.persistence.model.Category;
 import com.ecommerce.persistence.model.Product;
 import com.ecommerce.persistence.model.UserEntity;
 import com.ecommerce.persistence.repository.UserRepository;
 import com.ecommerce.persistence.repository.ProductRepository;
 import com.ecommerce.persistence.repository.CategoryRepository;
-import com.ecommerce.testutil.DbCleaner;
-import com.ecommerce.testutil.ValkeyTestCleaner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class OrderOwnershipSecurityIntegrationTest {
+class OrderOwnershipSecurityIntegrationTest extends AbstractFullDatabaseCleanupTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
@@ -38,10 +37,6 @@ class OrderOwnershipSecurityIntegrationTest {
     @Autowired private UserRepository userRepository;
     @Autowired private ProductRepository productRepository;
     @Autowired private CategoryRepository categoryRepository;
-    @Autowired private DbCleaner dbCleaner;
-    @Autowired(required = false)
-    ValkeyTestCleaner valkeyTestCleaner;
-
     @Autowired private PasswordEncoder passwordEncoder;
 
     private Long user1Id;
@@ -55,11 +50,6 @@ class OrderOwnershipSecurityIntegrationTest {
 
     @BeforeEach
     void setUp() throws Exception {
-
-        dbCleaner.clean();
-        if (valkeyTestCleaner != null) {
-            valkeyTestCleaner.clearAll();
-        }
 
         // два пользователя
         user1Id = userRepository.save(mkUser("user1@mail.com", "User1", "ROLE_USER")).getId();
@@ -129,8 +119,6 @@ class OrderOwnershipSecurityIntegrationTest {
 
         return objectMapper.readTree(json).get("id").asLong();
     }
-
-    // Ownership tests
 
     @Test
     void getOrderById_otherUserShouldBeForbidden() throws Exception {
