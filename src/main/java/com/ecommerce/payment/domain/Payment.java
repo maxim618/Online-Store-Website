@@ -18,10 +18,8 @@ import java.time.Instant;
 @Table(
         name = "payments",
         uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uk_payment_order_id",
-                        columnNames = "order_id"
-                )
+                @UniqueConstraint(name = "uk_payment_order_id", columnNames = "order_id"),
+                @UniqueConstraint(name = "uk_payment_idempotency", columnNames = "idempotency_key")
         }
 )
 
