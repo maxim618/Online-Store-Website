@@ -22,7 +22,6 @@ import java.time.Instant;
                 @UniqueConstraint(name = "uk_payment_idempotency", columnNames = "idempotency_key")
         }
 )
-
 public class Payment {
 
     @Id
@@ -71,13 +70,38 @@ public class Payment {
     protected Payment() {
     }
 
-    public void markPending(String externalPaymentId) {
+    public void markPending(String externalPaymentId,  String paymentUrl) {
+        ensureStatus(PaymentStatus.CREATED);
         this.status = PaymentStatus.PENDING;
         this.externalPaymentId = externalPaymentId;
+        this.paymentUrl = paymentUrl;
         this.updatedAt = Instant.now();
     }
 
-    public void setPaymentUrl(String paymentUrl) {
-        this.paymentUrl = paymentUrl;
+    private void ensureStatus(PaymentStatus expected) {
+        if (this.status != expected) {
+            throw new IllegalStateException(
+                    "Invalid payment state transition from " + this.status
+            );
+        }
     }
+
+    public void markSucceeded() {
+        if (this.status == PaymentStatus.SUCCEEDED) {
+            return; // idempotent no-op
+        }
+        ensureStatus(PaymentStatus.PENDING);
+        this.status = PaymentStatus.SUCCEEDED;
+        this.updatedAt = Instant.now();
+    }
+
+    public void markFailed(String reason) {
+        if (this.status == PaymentStatus.FAILED) {
+            return;
+        }
+        ensureStatus(PaymentStatus.PENDING);
+        this.status = PaymentStatus.FAILED;
+        this.updatedAt = Instant.now();
+    }
+
 }
