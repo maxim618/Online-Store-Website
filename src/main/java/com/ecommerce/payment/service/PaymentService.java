@@ -41,8 +41,10 @@ public class PaymentService {
         PaymentProvider provider = providerResolver.resolve(payment.getProvider());
         PaymentProviderResult result = provider.createPayment(payment);
 
-        payment.markPending(result.getExternalPaymentId());
-        payment.setPaymentUrl(result.getPaymentUrl());
+        payment.markPending(
+                result.getExternalPaymentId(),
+                result.getPaymentUrl()
+        );
         paymentRepository.save(payment);
 
         return paymentResponseMapper.toDto(payment);
